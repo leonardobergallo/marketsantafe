@@ -19,17 +19,19 @@ export function SearchBar() {
   // En JavaScript sería: const [search, setSearch] = useState({ ... })
   const [search, setSearch] = useState({
     q: '',
-    categoryId: '',
-    zoneId: '',
+    categoryId: 'all', // Valor inicial "all" para mostrar "Todas las categorías"
+    zoneId: 'all', // Valor inicial "all" para mostrar "Todas las zonas"
   })
 
   // Función para manejar la búsqueda
   const handleSearch = () => {
     // Construimos los query params
+    // TypeScript: filtramos valores vacíos y "all" (valor especial para "todas")
+    // En JavaScript sería similar pero sin tipos
     const params = new URLSearchParams()
     if (search.q) params.set('q', search.q)
-    if (search.categoryId) params.set('cat', search.categoryId)
-    if (search.zoneId) params.set('zone', search.zoneId)
+    if (search.categoryId && search.categoryId !== 'all') params.set('cat', search.categoryId)
+    if (search.zoneId && search.zoneId !== 'all') params.set('zone', search.zoneId)
 
     // Navegamos a /explorar con los filtros
     const queryString = params.toString()
@@ -75,7 +77,7 @@ export function SearchBar() {
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las categorías</SelectItem>
+                  <SelectItem value="all">Todas las categorías</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -91,7 +93,7 @@ export function SearchBar() {
                   <SelectValue placeholder="Zona" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las zonas</SelectItem>
+                  <SelectItem value="all">Todas las zonas</SelectItem>
                   {zones.map((zone) => (
                     <SelectItem key={zone.id} value={zone.id}>
                       {zone.name}

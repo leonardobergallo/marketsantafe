@@ -16,14 +16,18 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface AvisoPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function AvisoPage({ params }: AvisoPageProps) {
+export default async function AvisoPage({ params }: AvisoPageProps) {
+  // TypeScript: En Next.js 15+, params es una Promise y debe ser await
+  // En JavaScript sería: const { id } = await params
+  const { id } = await params
+  
   // Obtenemos la publicación por ID
-  const listing = getListingById(params.id)
+  const listing = getListingById(id)
 
   // Si no existe, mostramos 404
   if (!listing) {

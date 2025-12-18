@@ -57,9 +57,11 @@ export function FiltersPanel() {
     }
 
     // Actualizamos cada filtro
+    // TypeScript: filtramos valores vacíos y "all" (valor especial para "todas")
+    // En JavaScript sería similar pero sin tipos
     Object.entries(newFilters).forEach(([key, value]) => {
       const paramKey = paramMap[key] || key
-      if (value && value !== '') {
+      if (value && value !== '' && value !== 'all') {
         params.set(paramKey, String(value))
       } else {
         params.delete(paramKey)
@@ -106,14 +108,14 @@ export function FiltersPanel() {
       <div className="space-y-2">
         <Label htmlFor="category">Categoría</Label>
         <Select
-          value={currentFilters.category || ''}
+          value={currentFilters.category || 'all'}
           onValueChange={(value) => updateFilters({ category: value })}
         >
           <SelectTrigger id="category">
             <SelectValue placeholder="Todas las categorías" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas las categorías</SelectItem>
+            <SelectItem value="all">Todas las categorías</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
@@ -127,14 +129,14 @@ export function FiltersPanel() {
       <div className="space-y-2">
         <Label htmlFor="zone">Zona</Label>
         <Select
-          value={currentFilters.zone || ''}
+          value={currentFilters.zone || 'all'}
           onValueChange={(value) => updateFilters({ zone: value })}
         >
           <SelectTrigger id="zone">
             <SelectValue placeholder="Todas las zonas" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas las zonas</SelectItem>
+            <SelectItem value="all">Todas las zonas</SelectItem>
             {zones.map((zone) => (
               <SelectItem key={zone.id} value={zone.id}>
                 {zone.name}
@@ -148,14 +150,14 @@ export function FiltersPanel() {
       <div className="space-y-2">
         <Label htmlFor="condition">Condición</Label>
         <Select
-          value={currentFilters.condition || ''}
-          onValueChange={(value) => updateFilters({ condition: value as Condition })}
+          value={currentFilters.condition || 'all'}
+          onValueChange={(value) => updateFilters({ condition: value === 'all' ? undefined : (value as Condition) })}
         >
           <SelectTrigger id="condition">
             <SelectValue placeholder="Todas las condiciones" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas las condiciones</SelectItem>
+            <SelectItem value="all">Todas las condiciones</SelectItem>
             <SelectItem value="nuevo">Nuevo</SelectItem>
             <SelectItem value="usado">Usado</SelectItem>
             <SelectItem value="reacondicionado">Reacondicionado</SelectItem>

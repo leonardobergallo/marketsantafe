@@ -1,6 +1,6 @@
-// Página de explorar/listado de publicaciones con filtros
+// Página de Mercado - Todo lo NO gastronómico
 // TypeScript: Next.js App Router usa searchParams como prop
-// En JavaScript esto sería: export default function ExplorarPage({ searchParams }) { ... }
+// En JavaScript esto sería: export default function MercadoPage({ searchParams }) { ... }
 
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
@@ -11,8 +11,9 @@ import { filterListings, type ListingFilters } from '@/lib/mockListings'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Filter } from 'lucide-react'
+import Image from 'next/image'
 
-interface ExplorarPageProps {
+interface MercadoPageProps {
   searchParams?: {
     q?: string
     cat?: string
@@ -23,7 +24,7 @@ interface ExplorarPageProps {
   }
 }
 
-export default async function ExplorarPage({ searchParams }: ExplorarPageProps) {
+export default async function MercadoPage({ searchParams }: MercadoPageProps) {
   // TypeScript: En Next.js 15+, searchParams puede ser una Promise
   // En JavaScript sería: const params = await searchParams
   // Resolvemos searchParams si es una Promise
@@ -32,12 +33,12 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
   // Convertimos los searchParams a filtros para la función filterListings
   // TypeScript: necesitamos convertir los strings a números para min/max
   const filters: ListingFilters = {
-    q: resolvedParams.q,
-    category: resolvedParams.cat,
-    zone: resolvedParams.zone,
+    q: resolvedParams.q || undefined,
+    category: resolvedParams.cat || undefined,
+    zone: resolvedParams.zone || undefined,
     min: resolvedParams.min ? Number(resolvedParams.min) : undefined,
     max: resolvedParams.max ? Number(resolvedParams.max) : undefined,
-    condition: resolvedParams.cond as ListingFilters['condition'],
+    condition: (resolvedParams.cond as ListingFilters['condition']) || undefined,
   }
 
   // Filtramos las publicaciones según los parámetros
@@ -46,7 +47,30 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+      <main className="flex-1">
+        {/* Banner mercado - full ancho */}
+        <div className="relative w-full h-[200px] md:h-[250px] lg:h-[300px] mb-8">
+          <Image
+            src="/banner_mercado.png"
+            alt="Mercado - Lo que se vende cerca tuyo"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+        </div>
+
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+          {/* Header de la página */}
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              Mercado
+            </h1>
+            <p className="text-muted-foreground">
+              Lo que se vende cerca tuyo
+            </p>
+          </div>
+
         {/* Buscador principal */}
         <div className="mb-6">
           <div className="max-w-2xl mx-auto">
@@ -104,6 +128,7 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
               </div>
             )}
           </div>
+        </div>
         </div>
       </main>
       <Footer />

@@ -55,6 +55,14 @@ export function ListingCard({ listing }: ListingCardProps) {
 
         {/* Contenido */}
         <div className="p-4 flex-1 flex flex-col">
+          {/* Zona - MUY VISIBLE (principio clave) */}
+          {zone && (
+            <div className="mb-3 flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">{zone.name}</span>
+            </div>
+          )}
+
           {/* Precio */}
           <div className="mb-2">
             <span className="text-2xl font-bold text-foreground">
@@ -73,17 +81,11 @@ export function ListingCard({ listing }: ListingCardProps) {
           </p>
 
           {/* Meta información */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-auto">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-auto pt-3 border-t border-border">
             {category && (
               <Badge variant="outline" className="text-xs">
                 {category.name}
               </Badge>
-            )}
-            {zone && (
-              <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                <span>{zone.name}</span>
-              </div>
             )}
             <div className="flex items-center gap-1 ml-auto">
               <Calendar className="h-3 w-3" />

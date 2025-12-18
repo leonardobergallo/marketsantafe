@@ -6,26 +6,41 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Search, Menu } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { ZoneSelector } from "@/components/zone-selector"
+import Image from "next/image"
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 md:px-8 gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-primary" />
-            <span className="text-lg sm:text-xl font-bold text-foreground">MarketSantaFe</span>
+        <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo_marketsantafe.png"
+              alt="MarketSantaFe"
+              width={100}
+              height={100}
+              className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28 object-contain"
+              priority
+            />
+            <span className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-600">MarketSantaFe</span>
           </div>
         </Link>
 
         {/* Navegación Desktop */}
         <nav className="hidden lg:flex items-center gap-6 flex-1 max-w-md mx-8">
           <Link
-            href="/explorar"
+            href="/mercado"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Explorar
+            Mercado
+          </Link>
+          <Link
+            href="/comer"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Gastronomía
           </Link>
           <Link
             href="/publicar"
@@ -33,13 +48,12 @@ export function Header() {
           >
             Publicar
           </Link>
-          <Link
-            href="/negocios"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Negocios
-          </Link>
         </nav>
+
+        {/* Selector de zona en header */}
+        <div className="hidden lg:flex items-center">
+          <ZoneSelector />
+        </div>
 
         {/* Acciones */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -64,10 +78,16 @@ export function Header() {
             <SheetContent side="right">
               <nav className="flex flex-col gap-4 mt-8">
                 <Link
-                  href="/explorar"
+                  href="/mercado"
                   className="text-base font-medium text-foreground hover:text-primary transition-colors"
                 >
-                  Explorar
+                  Mercado
+                </Link>
+                <Link
+                  href="/comer"
+                  className="text-base font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Gastronomía
                 </Link>
                 <Link
                   href="/publicar"
@@ -75,12 +95,9 @@ export function Header() {
                 >
                   Publicar
                 </Link>
-                <Link
-                  href="/negocios"
-                  className="text-base font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  Negocios
-                </Link>
+                <div className="pt-4 border-t">
+                  <ZoneSelector />
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

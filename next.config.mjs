@@ -6,6 +6,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Desactivar source maps completamente
+  productionBrowserSourceMaps: false,
+  // Configuración de Turbopack (vacía para silenciar el warning)
+  turbopack: {},
 }
 
 export default nextConfig
