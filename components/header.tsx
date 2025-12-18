@@ -16,10 +16,10 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg sm:text-xl md:text-2xl">M</span>
+            <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm sm:text-base md:text-lg">M</span>
             </div>
-            <span className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-600">MarketSantaFe</span>
+            <span className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">MarketSantaFe</span>
           </div>
         </Link>
 
