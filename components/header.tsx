@@ -14,16 +14,11 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 md:px-8 gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo_marketsantafe.png"
-              alt="MarketSantaFe"
-              width={100}
-              height={100}
-              className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28 object-contain"
-              priority
-            />
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg sm:text-xl md:text-2xl">M</span>
+            </div>
             <span className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-600">MarketSantaFe</span>
           </div>
         </Link>
