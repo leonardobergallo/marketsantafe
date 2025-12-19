@@ -33,9 +33,9 @@ export function SearchBar() {
     if (search.categoryId && search.categoryId !== 'all') params.set('cat', search.categoryId)
     if (search.zoneId && search.zoneId !== 'all') params.set('zone', search.zoneId)
 
-    // Navegamos a /explorar con los filtros
+    // Navegamos a /mercado con los filtros
     const queryString = params.toString()
-    router.push(`/explorar${queryString ? `?${queryString}` : ''}`)
+    router.push(`/mercado${queryString ? `?${queryString}` : ''}`)
   }
 
   // Función para manejar Enter en el input

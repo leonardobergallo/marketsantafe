@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -12,12 +12,16 @@ import { useState, useEffect } from 'react'
 export function SearchInput() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [searchValue, setSearchValue] = useState(searchParams.get('q') || '')
 
   // Sincronizamos el valor con los query params cuando cambian
   useEffect(() => {
     setSearchValue(searchParams.get('q') || '')
   }, [searchParams])
+
+  // Determinar la ruta base según la página actual
+  const basePath = pathname === '/mercado' ? '/mercado' : '/explorar'
 
   // Función para actualizar la búsqueda
   const handleSearch = (value: string) => {
@@ -30,7 +34,7 @@ export function SearchInput() {
       params.delete('q')
     }
 
-    router.push(`/explorar?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   // Función para manejar Enter

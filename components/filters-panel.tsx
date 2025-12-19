@@ -13,7 +13,7 @@ import { categories } from '@/lib/categories'
 import { zones } from '@/lib/zones'
 import { type Condition } from '@/lib/mockListings'
 import { X } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export interface Filters {
   q?: string
@@ -27,6 +27,7 @@ export interface Filters {
 export function FiltersPanel() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   // Obtenemos los valores actuales de los query params
   // TypeScript: searchParams.get puede retornar null, por eso usamos || undefined
@@ -38,6 +39,9 @@ export function FiltersPanel() {
     max: searchParams.get('max') ? Number(searchParams.get('max')) : undefined,
     condition: (searchParams.get('cond') as Condition) || undefined,
   }
+
+  // Determinar la ruta base según la página actual
+  const basePath = pathname === '/mercado' ? '/mercado' : '/explorar'
 
   // Función para actualizar los query params
   // En JavaScript esto sería una función normal sin tipos
@@ -69,12 +73,12 @@ export function FiltersPanel() {
     })
 
     // Navegamos a la nueva URL con los filtros actualizados
-    router.push(`/explorar?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   // Función para limpiar todos los filtros
   const clearFilters = () => {
-    router.push('/explorar')
+    router.push(basePath)
   }
 
   // Verificamos si hay filtros activos

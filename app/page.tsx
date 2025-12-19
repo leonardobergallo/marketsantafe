@@ -8,14 +8,29 @@ import { Footer } from '@/components/footer'
 import { ListingCard } from '@/components/listing-card'
 import { CategoryGrid } from '@/components/category-grid'
 import { BusinessSection } from '@/components/business-section'
-import { getFeaturedListings } from '@/lib/mockListings'
+import { getListings, type ListingFilters } from '@/lib/db-queries'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, UtensilsCrossed } from 'lucide-react'
 
-export default function Home() {
-  // Obtenemos las publicaciones destacadas (las primeras 6)
-  const featuredListings = getFeaturedListings().slice(0, 6)
+interface HomeProps {
+  searchParams?: {
+    zone?: string
+  }
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  // Resolver searchParams si es una Promise
+  const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
+  
+  // Obtener listings destacados con filtro de zona si existe
+  const filters: ListingFilters = {
+    zone: resolvedParams.zone || undefined,
+  }
+  
+  const allListings = await getListings(filters)
+  // Obtener las primeras 6 publicaciones (priorizando destacadas)
+  const featuredListings = allListings.slice(0, 6)
 
   return (
     <div className="min-h-screen">

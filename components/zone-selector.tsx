@@ -41,14 +41,15 @@ export function ZoneSelector() {
     localStorage.setItem('selectedZone', zoneId)
 
     // Actualizamos la URL si estamos en una página que usa filtros
-    if (pathname === '/mercado' || pathname === '/comer') {
+    if (pathname === '/mercado' || pathname === '/comer' || pathname === '/') {
       const params = new URLSearchParams(window.location.search)
       if (zoneId === 'all') {
         params.delete('zone')
       } else {
         params.set('zone', zoneId)
       }
-      router.push(`${pathname}?${params.toString()}`)
+      const queryString = params.toString()
+      router.push(`${pathname}${queryString ? `?${queryString}` : ''}`)
     }
   }
 

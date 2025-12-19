@@ -52,17 +52,27 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       params.push(`%${filters.q}%`)
     }
 
-    // Filtro por categoría
+    // Filtro por categoría (puede ser ID o slug)
     if (filters.category) {
       paramCount++
-      query += ` AND c.slug = $${paramCount}`
+      // Intentar buscar por ID primero, si no es numérico buscar por slug
+      if (/^\d+$/.test(filters.category)) {
+        query += ` AND c.id = $${paramCount}`
+      } else {
+        query += ` AND c.slug = $${paramCount}`
+      }
       params.push(filters.category)
     }
 
-    // Filtro por zona
+    // Filtro por zona (puede ser ID o slug)
     if (filters.zone) {
       paramCount++
-      query += ` AND z.slug = $${paramCount}`
+      // Intentar buscar por ID primero, si no es numérico buscar por slug
+      if (/^\d+$/.test(filters.zone)) {
+        query += ` AND z.id = $${paramCount}`
+      } else {
+        query += ` AND z.slug = $${paramCount}`
+      }
       params.push(filters.zone)
     }
 
