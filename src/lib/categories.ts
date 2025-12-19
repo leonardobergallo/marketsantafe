@@ -80,3 +80,4 @@ export function getCategoryById(id: string): Category | undefined {
   return categories.find((cat) => cat.id === id)
 }
 
+

@@ -15,6 +15,7 @@ export interface Listing {
   condition: Condition
   description: string
   imageUrl: string
+  images?: string[] // Múltiples imágenes (máximo 3 recomendado)
   createdAt: string // ISO date string
   whatsapp?: string
   phone?: string

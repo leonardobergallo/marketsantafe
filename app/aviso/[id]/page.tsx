@@ -7,13 +7,16 @@ import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { getListingById } from '@/lib/mockListings'
+import { getListingById } from '@/lib/db-queries'
+import { type Listing } from '@/lib/mockListings'
 import { getCategoryById } from '@/lib/categories'
 import { getZoneById } from '@/lib/zones'
 import { formatPrice } from '@/lib/utils'
 import { ArrowLeft, Phone, MessageCircle, MapPin, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ImageGallery } from '@/components/image-gallery'
+import { SafeImage } from '@/components/safe-image'
 
 interface AvisoPageProps {
   params: Promise<{
@@ -26,8 +29,8 @@ export default async function AvisoPage({ params }: AvisoPageProps) {
   // En JavaScript sería: const { id } = await params
   const { id } = await params
   
-  // Obtenemos la publicación por ID
-  const listing = getListingById(id)
+  // Obtener listing de la base de datos
+  const listing = await getListingById(id)
 
   // Si no existe, mostramos 404
   if (!listing) {
@@ -75,15 +78,19 @@ export default async function AvisoPage({ params }: AvisoPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Columna principal - Imagen y descripción */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Imagen principal */}
-            <Card className="overflow-hidden">
-              <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-                <img
-                  src={listing.imageUrl}
-                  alt={listing.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            {/* Galería de imágenes */}
+            <Card className="overflow-hidden p-4">
+              {listing.images && listing.images.length > 0 ? (
+                <ImageGallery images={listing.images} alt={listing.title} maxPreview={3} />
+              ) : (
+                <div className="aspect-[4/3] w-full overflow-hidden bg-muted rounded-lg">
+                  <SafeImage
+                    src={listing.imageUrl || '/placeholder.jpg'}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </Card>
 
             {/* Información principal */}

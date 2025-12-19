@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Search, Menu } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ZoneSelector } from "@/components/zone-selector"
+import { UserMenu } from "@/components/user-menu"
 import Image from "next/image"
 
 export function Header() {
@@ -52,16 +53,10 @@ export function Header() {
 
         {/* Acciones */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            asChild
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm px-3 sm:px-4"
-          >
-            <Link href="/publicar">
-              <span className="hidden sm:inline">Publicar gratis</span>
-              <span className="sm:hidden">Publicar</span>
-            </Link>
-          </Button>
+          {/* Menú de usuario (incluye botones de login/registro o perfil) */}
+          <div className="hidden sm:block">
+            <UserMenu />
+          </div>
           
           {/* Menú mobile */}
           <Sheet>
@@ -92,6 +87,9 @@ export function Header() {
                 </Link>
                 <div className="pt-4 border-t">
                   <ZoneSelector />
+                </div>
+                <div className="pt-4 border-t">
+                  <UserMenu />
                 </div>
               </nav>
             </SheetContent>

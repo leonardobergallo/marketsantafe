@@ -2,6 +2,8 @@
 // TypeScript: definimos las props con una interfaz
 // En JavaScript esto sería: export function ListingCard({ listing, ... }) { ... }
 
+'use client'
+
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +12,7 @@ import { getCategoryById } from '@/lib/categories'
 import { getZoneById } from '@/lib/zones'
 import { type Listing } from '@/lib/mockListings'
 import { MapPin, Calendar } from 'lucide-react'
+import { SafeImage } from './safe-image'
 
 interface ListingCardProps {
   listing: Listing
@@ -38,13 +41,33 @@ export function ListingCard({ listing }: ListingCardProps) {
   return (
     <Link href={`/aviso/${listing.id}`}>
       <Card className="group cursor-pointer border border-border bg-card hover:border-primary hover:shadow-lg transition-all duration-200 overflow-hidden h-full flex flex-col">
-        {/* Imagen */}
+        {/* Imagen/Imágenes */}
         <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
-          <img
-            src={listing.imageUrl}
-            alt={listing.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          />
+          {/* Si hay múltiples imágenes, mostrar galería pequeña */}
+          {listing.images && listing.images.length > 1 ? (
+            <div className="grid grid-cols-2 gap-1 h-full">
+              {listing.images.slice(0, 3).map((img, idx) => (
+                <div key={idx} className="relative overflow-hidden">
+                  <SafeImage
+                    src={img}
+                    alt={`${listing.title} ${idx + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                  {idx === 0 && listing.images.length > 3 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">+{listing.images.length - 3}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <SafeImage
+              src={listing.imageUrl || listing.images?.[0] || '/placeholder.jpg'}
+              alt={listing.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
+          )}
           {/* Badge de condición */}
           <div className="absolute top-2 right-2">
             <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">

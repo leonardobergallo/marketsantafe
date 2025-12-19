@@ -45,16 +45,41 @@ async function setupDatabase() {
         id SERIAL PRIMARY KEY,
         name VARCHAR(200) NOT NULL,
         email VARCHAR(255) UNIQUE,
+        password_hash VARCHAR(255),
         phone VARCHAR(20),
         whatsapp VARCHAR(20),
         is_business BOOLEAN DEFAULT FALSE,
         business_name VARCHAR(200),
         avatar_url TEXT,
+        verified BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `)
     console.log('✅ Tabla users creada')
+    
+    // Migración: agregar campos si no existen (para bases de datos existentes)
+    await client.query(`
+      DO $$ 
+      BEGIN
+        -- Agregar password_hash si no existe
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'password_hash'
+        ) THEN
+          ALTER TABLE users ADD COLUMN password_hash VARCHAR(255);
+        END IF;
+        
+        -- Agregar verified si no existe
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'verified'
+        ) THEN
+          ALTER TABLE users ADD COLUMN verified BOOLEAN DEFAULT FALSE;
+        END IF;
+      END $$;
+    `)
+    console.log('✅ Campos de autenticación verificados/agregados')
 
     // Tabla de publicaciones del mercado
     await client.query(`

@@ -7,7 +7,8 @@ import { Footer } from '@/components/footer'
 import { ListingCard } from '@/components/listing-card'
 import { FiltersPanel } from '@/components/filters-panel'
 import { SearchInput } from '@/components/search-input'
-import { filterListings, type ListingFilters } from '@/lib/mockListings'
+import { getListings, type ListingFilters } from '@/lib/db-queries'
+import { type Listing } from '@/lib/mockListings'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Filter } from 'lucide-react'
@@ -30,8 +31,7 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
   // Resolvemos searchParams si es una Promise
   const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
   
-  // Convertimos los searchParams a filtros para la función filterListings
-  // TypeScript: necesitamos convertir los strings a números para min/max
+  // Convertimos los searchParams a filtros
   const filters: ListingFilters = {
     q: resolvedParams.q || undefined,
     category: resolvedParams.cat || undefined,
@@ -41,8 +41,8 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
     condition: (resolvedParams.cond as ListingFilters['condition']) || undefined,
   }
 
-  // Filtramos las publicaciones según los parámetros
-  const filteredListings = filterListings(filters)
+  // Obtener listings de la base de datos
+  const filteredListings = await getListings(filters)
 
   return (
     <div className="min-h-screen flex flex-col">
