@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, User, Store } from 'lucide-react'
+import { LogOut, User, Store, Package } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface User {
@@ -149,6 +149,12 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/mis-ventas" className="cursor-pointer">
+            <Package className="mr-2 h-4 w-4" />
+            <span>Mis ventas</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/publicar" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
