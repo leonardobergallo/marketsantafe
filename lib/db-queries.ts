@@ -143,7 +143,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
   }
 }
 
-export async function getListingById(id: string): Promise<Listing | null> {
+export async function getListingById(id: string, userId?: number): Promise<(Listing & { userId?: number; currency?: string; email?: string; instagram?: string }) | null> {
   try {
     const listingId = parseInt(id)
 
@@ -157,6 +157,7 @@ export async function getListingById(id: string): Promise<Listing | null> {
         l.title,
         l.description,
         l.price,
+        l.currency,
         l.condition,
         l.image_url,
         l.images,
@@ -164,14 +165,19 @@ export async function getListingById(id: string): Promise<Listing | null> {
         l.active,
         l.views,
         l.created_at,
+        l.user_id,
+        l.whatsapp,
+        l.phone,
+        l.email,
+        l.instagram,
         c.id as category_id,
         c.name as category_name,
         c.slug as category_slug,
         z.id as zone_id,
         z.name as zone_name,
         z.slug as zone_slug,
-        u.whatsapp,
-        u.phone,
+        u.whatsapp as user_whatsapp,
+        u.phone as user_phone,
         u.name as user_name,
         u.is_business,
         u.business_name

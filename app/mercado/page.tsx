@@ -10,7 +10,7 @@ import { SearchInput } from '@/components/search-input'
 import { getListings, type ListingFilters } from '@/lib/db-queries'
 import { type Listing } from '@/lib/mockListings'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Filter } from 'lucide-react'
 import Image from 'next/image'
 
@@ -49,7 +49,7 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
       <Header />
       <main className="flex-1">
         {/* Banner mercado - full ancho */}
-        <div className="relative w-full h-[200px] md:h-[250px] lg:h-[300px] mb-8">
+        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[280px] lg:h-[320px] xl:h-[360px] mb-6 sm:mb-8">
           <Image
             src="/banner_mercado.png"
             alt="Mercado - Lo que se vende cerca tuyo"
@@ -98,6 +98,9 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Filtros</SheetTitle>
+                  </SheetHeader>
                   <FiltersPanel />
                 </SheetContent>
               </Sheet>

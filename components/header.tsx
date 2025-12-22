@@ -54,9 +54,7 @@ export function Header() {
         {/* Acciones */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Menú de usuario (incluye botones de login/registro o perfil) */}
-          <div className="hidden sm:block">
-            <UserMenu />
-          </div>
+          <UserMenu />
           
           {/* Menú mobile */}
           <Sheet>

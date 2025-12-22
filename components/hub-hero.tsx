@@ -14,7 +14,7 @@ export function HubHero() {
   return (
     <section className="relative overflow-hidden">
       {/* Banner hero - ocupando toda la imagen */}
-      <div className="relative w-full h-[50vh] min-h-[400px] max-h-[600px]">
+      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px]">
         <Image
           src="/banner_hero.png"
           alt="MarketSantaFe - Comprá, vendé y comé cerca tuyo"

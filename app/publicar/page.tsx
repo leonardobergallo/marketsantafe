@@ -18,7 +18,7 @@ import { categories } from '@/lib/categories'
 import { zones } from '@/lib/zones'
 import { type Condition } from '@/lib/mockListings'
 import { toast } from 'sonner'
-import { ArrowLeft, ShoppingBag, UtensilsCrossed, Loader2 } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, UtensilsCrossed, Loader2, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -284,6 +284,14 @@ export default function PublicarPage() {
           <p className="text-muted-foreground">
             Publicá fácil, vendé directo
           </p>
+          <div className="mt-4">
+            <Link href="/publicar/masivo">
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Upload className="h-4 w-4 mr-2" />
+                Carga Masiva (múltiples productos)
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Selector de vertical - Paso 1 */}
@@ -560,7 +568,7 @@ export default function PublicarPage() {
             <div className="space-y-2">
               <Label>Fotos</Label>
               <ImageUpload
-                maxImages={3}
+                maxImages={10}
                 value={mercadoForm.watch('images') || []}
                 onChange={(images) => mercadoForm.setValue('images', images)}
                 disabled={isSubmitting}
@@ -811,7 +819,7 @@ export default function PublicarPage() {
               <ImageUpload
                 value={gastronomiaForm.watch('images') || []}
                 onChange={(images) => gastronomiaForm.setValue('images', images)}
-                maxImages={3}
+                maxImages={10}
                 disabled={isSubmitting}
               />
             </div>

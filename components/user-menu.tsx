@@ -73,21 +73,21 @@ export function UserMenu() {
   if (loading) {
     return (
       <div className="flex items-center gap-2">
-        <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+        <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-muted animate-pulse ring-2 ring-muted" />
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2 flex-col sm:flex-row">
-        <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm w-full sm:w-auto">
+      <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm" className="text-xs sm:text-sm">
           <Link href="/login">Iniciar sesión</Link>
         </Button>
         <Button 
           asChild 
           size="sm" 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm px-3 sm:px-4 w-full sm:w-auto"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm px-3 sm:px-4"
         >
           <Link href="/publicar">
             <span className="hidden sm:inline">Publicar gratis</span>
@@ -106,7 +106,7 @@ export function UserMenu() {
     .slice(0, 2)
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 sm:gap-3">
       <Button
         asChild
         size="sm"
@@ -119,11 +119,18 @@ export function UserMenu() {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
+          <Button 
+            variant="ghost" 
+            className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full p-0 hover:bg-muted transition-colors"
+          >
+            <Avatar className="h-9 w-9 sm:h-10 sm:w-10 ring-2 ring-primary ring-offset-2 ring-offset-background">
               <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
-              <AvatarFallback>{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm sm:text-base">
+                {initials}
+              </AvatarFallback>
             </Avatar>
+            {/* Indicador de estado online */}
+            <span className="absolute bottom-0 right-0 h-3 w-3 sm:h-3.5 sm:w-3.5 bg-green-500 border-2 border-background rounded-full"></span>
           </Button>
         </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

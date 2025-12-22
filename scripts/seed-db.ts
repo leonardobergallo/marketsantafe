@@ -30,6 +30,10 @@ async function seedDatabase() {
       { name: 'Alto Verde', slug: 'alto-verde' },
       { name: 'Guadalupe', slug: 'guadalupe' },
       { name: 'Santo Tomé', slug: 'santo-tome' },
+      { name: 'Colastiné', slug: 'colastine' },
+      { name: 'Colastiné, Santa Fe', slug: 'colastine-santa-fe' },
+      { name: 'Santa Fe', slug: 'santa-fe' },
+      { name: 'Toda la ciudad', slug: 'toda-la-ciudad' },
     ]
 
     for (const zone of zones) {
@@ -53,6 +57,9 @@ async function seedDatabase() {
       { name: 'Deportes', slug: 'deportes', icon: 'Dumbbell' },
       { name: 'Mascotas', slug: 'mascotas', icon: 'Dog' },
       { name: 'Emprendedores', slug: 'emprendedores', icon: 'Store' },
+      { name: 'Jardín y Herramientas', slug: 'jardin-herramientas', icon: 'Wrench' },
+      { name: 'Consolas y Videojuegos', slug: 'consolas-videojuegos', icon: 'Gamepad2' },
+      { name: 'Hogar y Oficina', slug: 'hogar-oficina', icon: 'Briefcase' },
     ]
 
     for (const category of categories) {

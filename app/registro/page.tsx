@@ -1,7 +1,7 @@
 // Página de registro de usuarios
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -16,7 +16,7 @@ import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { toast } from 'sonner'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 import { emailSchema, phoneSchema, whatsappSchema, nameSchema } from '@/lib/validations'
 
 // Schema de validación
@@ -38,33 +38,40 @@ const registerSchema = z
     phone: phoneSchema,
     whatsapp: whatsappSchema,
     is_business: z.boolean().default(false),
-    business_name: z
-      .string()
-      .optional()
-      .or(z.literal(''))
-      .refine(
-        (val, ctx) => {
-          // Si es negocio, el nombre es requerido
-          if (ctx.parent.is_business) {
-            return val && val.trim() !== ''
-          }
-          return true
-        },
-        {
-          message: 'El nombre del negocio es requerido',
-        }
-      ),
+    business_name: z.string().default(''),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   })
+  .refine(
+    (data) => {
+      // Si es negocio, el nombre es requerido
+      if (data.is_business) {
+        return data.business_name && typeof data.business_name === 'string' && data.business_name.trim() !== ''
+      }
+      return true
+    },
+    {
+      message: 'El nombre del negocio es requerido',
+      path: ['business_name'],
+    }
+  )
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
 export default function RegistroPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [emailStatus, setEmailStatus] = useState<{
+    checking: boolean
+    exists: boolean | null
+    valid: boolean | null
+  }>({
+    checking: false,
+    exists: null,
+    valid: null,
+  })
 
   const {
     register,
@@ -79,6 +86,54 @@ export default function RegistroPage() {
   })
 
   const isBusiness = watch('is_business')
+  const emailValue = watch('email')
+
+  // Verificar email en tiempo real con debounce
+  useEffect(() => {
+    if (!emailValue || emailValue.trim() === '') {
+      setEmailStatus({ checking: false, exists: null, valid: null })
+      return
+    }
+
+    // Validar formato básico antes de hacer la petición
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailValue)) {
+      setEmailStatus({ checking: false, exists: null, valid: false })
+      return
+    }
+
+    // Debounce: esperar 500ms después de que el usuario deje de escribir
+    const timeoutId = setTimeout(async () => {
+      setEmailStatus({ checking: true, exists: null, valid: null })
+
+      try {
+        const response = await fetch(`/api/auth/check-email?email=${encodeURIComponent(emailValue)}`)
+        const data = await response.json()
+
+        if (response.ok) {
+          setEmailStatus({
+            checking: false,
+            exists: data.exists,
+            valid: data.valid,
+          })
+
+          if (data.exists) {
+            toast.error('Este email ya está registrado', {
+              description: '¿Querés iniciar sesión en su lugar?',
+              duration: 4000,
+            })
+          }
+        } else {
+          setEmailStatus({ checking: false, exists: null, valid: false })
+        }
+      } catch (error) {
+        console.error('Error verificando email:', error)
+        setEmailStatus({ checking: false, exists: null, valid: null })
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [emailValue])
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true)
@@ -109,6 +164,16 @@ export default function RegistroPage() {
         if (result.details && Array.isArray(result.details)) {
           const errorMessages = result.details.map((d: any) => d.message).join(', ')
           toast.error(errorMessages || result.error || 'Error al registrar usuario')
+        } else if (response.status === 409) {
+          // Error de conflicto (email ya existe)
+          toast.error('Este email ya está registrado', {
+            description: '¿Querés iniciar sesión en su lugar?',
+            duration: 5000,
+            action: {
+              label: 'Ir a login',
+              onClick: () => router.push('/login'),
+            },
+          })
         } else {
           toast.error(result.error || 'Error al registrar usuario')
         }
@@ -172,15 +237,53 @@ export default function RegistroPage() {
               <Label htmlFor="email">
                 Email <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email')}
-                placeholder="tu@email.com"
-                disabled={isSubmitting}
-              />
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  {...register('email')}
+                  placeholder="tu@email.com"
+                  disabled={isSubmitting}
+                  className={
+                    emailStatus.exists
+                      ? 'border-destructive pr-10'
+                      : emailStatus.exists === false && emailStatus.valid
+                      ? 'border-green-500 pr-10'
+                      : ''
+                  }
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {emailStatus.checking ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : emailStatus.exists ? (
+                    <XCircle className="h-4 w-4 text-destructive" />
+                  ) : emailStatus.exists === false && emailStatus.valid ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  ) : null}
+                </div>
+              </div>
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+              {emailStatus.exists && !errors.email && (
+                <div className="flex items-start gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Este email ya está registrado</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ¿Ya tenés cuenta?{' '}
+                      <Link href="/login" className="text-primary hover:underline font-medium">
+                        Iniciar sesión
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {emailStatus.exists === false && emailStatus.valid && !errors.email && (
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Email disponible
+                </p>
               )}
             </div>
 

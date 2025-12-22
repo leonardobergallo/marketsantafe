@@ -7,9 +7,9 @@ import { Footer } from '@/components/footer'
 import { ListingCard } from '@/components/listing-card'
 import { FiltersPanel } from '@/components/filters-panel'
 import { SearchInput } from '@/components/search-input'
-import { filterListings, type ListingFilters } from '@/lib/mockListings'
+import { getListings, type ListingFilters } from '@/lib/db-queries'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Filter } from 'lucide-react'
 
 interface ExplorarPageProps {
@@ -29,7 +29,7 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
   // Resolvemos searchParams si es una Promise
   const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
   
-  // Convertimos los searchParams a filtros para la función filterListings
+  // Convertimos los searchParams a filtros para la función getListings
   // TypeScript: necesitamos convertir los strings a números para min/max
   const filters: ListingFilters = {
     q: resolvedParams.q,
@@ -40,8 +40,8 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
     condition: resolvedParams.cond as ListingFilters['condition'],
   }
 
-  // Filtramos las publicaciones según los parámetros
-  const filteredListings = filterListings(filters)
+  // Obtener listings de la base de datos con los filtros aplicados
+  const filteredListings = await getListings(filters)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,6 +74,9 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Filtros</SheetTitle>
+                  </SheetHeader>
                   <FiltersPanel />
                 </SheetContent>
               </Sheet>

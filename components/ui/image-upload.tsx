@@ -3,8 +3,9 @@
 
 import { useState, useRef } from 'react'
 import { Button } from './button'
-import { X, Upload, Image as ImageIcon } from 'lucide-react'
+import { X, Upload, Image as ImageIcon, Sparkles, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface ImageUploadProps {
   value?: string[]
@@ -16,11 +17,12 @@ interface ImageUploadProps {
 export function ImageUpload({
   value = [],
   onChange,
-  maxImages = 3, // Cambiado a 3 por defecto (recomendado)
+  maxImages = 10, // Aumentado a 10 para permitir más fotos
   disabled = false,
 }: ImageUploadProps) {
   const [images, setImages] = useState<string[]>(value)
   const [isDragging, setIsDragging] = useState(false)
+  const [enhancingIndex, setEnhancingIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (files: FileList | null) => {
@@ -74,6 +76,59 @@ export function ImageUpload({
     fileInputRef.current?.click()
   }
 
+  const enhanceImage = async (index: number, mode: 'remove-object' | 'remove-people' | 'cleanup' = 'remove-object') => {
+    if (enhancingIndex !== null) return // Ya hay una mejora en proceso
+    
+    setEnhancingIndex(index)
+    const imageToEnhance = images[index]
+
+    try {
+      // Extraer base64 sin el prefijo data:image
+      const base64Data = imageToEnhance.includes(',') 
+        ? imageToEnhance.split(',')[1] 
+        : imageToEnhance.replace(/^data:image\/[a-z]+;base64,/, '')
+
+      const response = await fetch('/api/images/enhance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageToEnhance, // Enviar completo con data:image
+          mode,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        if (result.note) {
+          toast.error(result.error, {
+            description: result.note,
+            duration: 5000,
+          })
+        } else {
+          toast.error(result.error || 'Error al mejorar la imagen')
+        }
+        setEnhancingIndex(null)
+        return
+      }
+
+      // Reemplazar la imagen mejorada
+      const updatedImages = [...images]
+      updatedImages[index] = result.image
+      setImages(updatedImages)
+      onChange?.(updatedImages)
+      
+      toast.success('Imagen mejorada exitosamente')
+      setEnhancingIndex(null)
+    } catch (error) {
+      console.error('Error al mejorar imagen:', error)
+      toast.error('Error al mejorar la imagen. Intenta nuevamente.')
+      setEnhancingIndex(null)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div
@@ -108,7 +163,7 @@ export function ImageUpload({
                 Arrastrá imágenes aquí o hacé clic para seleccionar
               </p>
               <p className="text-xs text-muted-foreground">
-                Recomendado: {maxImages} imágenes (máximo 5). Formatos: JPG, PNG, etc.
+                Puedes subir hasta {maxImages} imágenes. Formatos: JPG, PNG, etc.
               </p>
             </div>
             <Button
@@ -134,16 +189,43 @@ export function ImageUpload({
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeImage(index)}
-                    disabled={disabled}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
+                  {/* Botones de acción */}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      className="h-7 w-7 bg-background/90 hover:bg-background border border-border/50"
+                      onClick={() => enhanceImage(index, 'remove-object')}
+                      disabled={disabled || enhancingIndex === index}
+                      title="Mejorar imagen: Eliminar objetos o personas no deseadas"
+                    >
+                      {enhancingIndex === index ? (
+                        <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 text-primary" />
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => removeImage(index)}
+                      disabled={disabled || enhancingIndex === index}
+                      title="Eliminar imagen"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  {enhancingIndex === index && (
+                    <div className="absolute inset-0 bg-background/50 rounded-lg flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <p className="text-xs text-foreground">Mejorando...</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

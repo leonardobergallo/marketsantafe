@@ -42,3 +42,4 @@ Google Maps tiene un tier gratuito generoso:
 ⚠️ **IMPORTANTE**: Nunca commitees tu API Key al repositorio. El archivo `.env.local` ya está en `.gitignore`.
 
 
+
