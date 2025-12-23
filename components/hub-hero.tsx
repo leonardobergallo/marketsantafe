@@ -13,8 +13,8 @@ import Image from 'next/image'
 export function HubHero() {
   return (
     <section className="relative overflow-hidden">
-      {/* Banner hero - ocupando toda la imagen */}
-      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px]">
+      {/* Banner hero - altura fija para web, responsive en móvil */}
+      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[350px]">
         <Image
           src="/banner_hero.png"
           alt="MarketSantaFe - Comprá, vendé y comé cerca tuyo"

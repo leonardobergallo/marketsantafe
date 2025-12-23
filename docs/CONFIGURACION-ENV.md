@@ -137,3 +137,4 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_google_maps
 - Verifica que la API de Maps JavaScript esté habilitada en Google Cloud Console
 - Verifica que tu API key tenga los permisos correctos
 
+

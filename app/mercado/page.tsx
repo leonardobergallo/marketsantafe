@@ -49,7 +49,7 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
       <Header />
       <main className="flex-1">
         {/* Banner mercado - full ancho */}
-        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[280px] lg:h-[320px] xl:h-[360px] mb-6 sm:mb-8">
+        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[300px] lg:h-[380px] xl:h-[450px] 2xl:h-[520px] mb-6 sm:mb-8">
           <Image
             src="/banner_mercado.png"
             alt="Mercado - Lo que se vende cerca tuyo"

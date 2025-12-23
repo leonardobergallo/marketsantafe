@@ -96,3 +96,4 @@ verifyPhotosExist()
     process.exit(1)
   })
 
+

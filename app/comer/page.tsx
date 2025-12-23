@@ -142,7 +142,7 @@ export default async function ComerPage({ searchParams }: ComerPageProps) {
       <Header />
       <main className="flex-1">
         {/* Banner gastronomía - full ancho */}
-        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[280px] lg:h-[320px] xl:h-[360px] mb-6 sm:mb-8">
+        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[300px] lg:h-[380px] xl:h-[450px] 2xl:h-[520px] mb-6 sm:mb-8">
           <Image
             src="/banner_gastronomia.png"
             alt="Gastronomía - Qué comer cerca tuyo"

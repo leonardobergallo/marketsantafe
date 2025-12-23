@@ -5,7 +5,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Search, Menu } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ZoneSelector } from "@/components/zone-selector"
 import { UserMenu } from "@/components/user-menu"
 import Image from "next/image"
@@ -64,7 +64,10 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <nav className="flex flex-col gap-4 mt-8">
+              <SheetHeader>
+                <SheetTitle>Menú de navegación</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-4 mt-4">
                 <Link
                   href="/mercado"
                   className="text-base font-medium text-foreground hover:text-primary transition-colors"
