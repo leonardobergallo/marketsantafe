@@ -43,14 +43,14 @@ export default async function BuscarInmobiliariaPage({ searchParams }: BuscarInm
   }
 
   // Obtener propiedades inmobiliarias con filtros aplicados
-  // Si hay tipo específico, usar esa categoría, sino obtener ambas
+  // SIEMPRE filtrar solo categorías 1 (Alquileres) y 2 (Inmuebles)
   let filteredListings: any[] = []
   
   if (categoryId) {
     // Si hay tipo específico, solo obtener esa categoría
     filteredListings = await getListings(filters)
   } else {
-    // Obtener ambas categorías (alquileres e inmuebles)
+    // Obtener ambas categorías (alquileres e inmuebles) - SIEMPRE solo estas dos
     const alquileres = await getListings({ ...filters, category: '1' })
     const inmuebles = await getListings({ ...filters, category: '2' })
     filteredListings = [...alquileres, ...inmuebles]
@@ -63,6 +63,12 @@ export default async function BuscarInmobiliariaPage({ searchParams }: BuscarInm
       return true
     })
   }
+  
+  // Asegurar que SOLO sean propiedades inmobiliarias (categorías 1 o 2)
+  filteredListings = filteredListings.filter((listing: any) => {
+    const catId = listing.categoryId || listing.category_id
+    return catId === '1' || catId === '2' || catId === 1 || catId === 2
+  })
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -21,7 +21,12 @@ export function SearchInput() {
   }, [searchParams])
 
   // Determinar la ruta base según la página actual
-  const basePath = pathname === '/mercado' ? '/mercado' : '/explorar'
+  let basePath = '/explorar'
+  if (pathname === '/mercado') {
+    basePath = '/mercado'
+  } else if (pathname?.includes('/inmobiliaria-en-equipo')) {
+    basePath = '/inmobiliaria-en-equipo/buscar'
+  }
 
   // Función para actualizar la búsqueda
   const handleSearch = (value: string) => {
@@ -49,7 +54,7 @@ export function SearchInput() {
       <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
-        placeholder="Buscar productos, servicios..."
+        placeholder={pathname?.includes('/inmobiliaria-en-equipo') ? 'Buscar propiedades...' : 'Buscar productos, servicios...'}
         value={searchValue}
         onChange={(e) => handleSearch(e.target.value)}
         onKeyPress={handleKeyPress}
