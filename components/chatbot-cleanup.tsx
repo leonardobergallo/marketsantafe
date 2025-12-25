@@ -24,21 +24,42 @@ export function ChatbotCleanup() {
       
       // Si estás en la página de inmobiliaria, mostrar el chatbot
       if (isInmobiliariaPage) {
-        // Mostrar el botón del chatbot
-        const chatbotButton = document.querySelector('.inmobiliaria-chatbot-button, [id*="chatbot"], [class*="chatbot-button"], [data-chatbot], [id*="chatbot-button"]')
-        if (chatbotButton && chatbotButton instanceof HTMLElement) {
-          chatbotButton.style.removeProperty('display')
-          chatbotButton.style.removeProperty('visibility')
-          chatbotButton.style.removeProperty('opacity')
-        }
+        // Restaurar todos los estilos del chatbot para que sea visible
+        const selectors = [
+          '.inmobiliaria-chatbot-button',
+          '[id*="chatbot"]',
+          '[class*="chatbot-button"]',
+          '[data-chatbot]',
+          '[id*="chatbot-button"]',
+          '.inmobiliaria-chatbot-widget',
+          '[id*="chatbot-widget"]',
+          '[class*="chatbot-widget"]',
+          '[class*="chatbot-modal"]',
+          '[id*="chatbot-modal"]',
+          'iframe[src*="chatbot"]',
+          'iframe[src*="inmobiliaria"]',
+        ]
         
-        // Mostrar el widget del chatbot si existe
-        const chatbotWidget = document.querySelector('.inmobiliaria-chatbot-widget, [id*="chatbot-widget"], [class*="chatbot-widget"], [class*="chatbot-modal"], [id*="chatbot-modal"]')
-        if (chatbotWidget && chatbotWidget instanceof HTMLElement) {
-          chatbotWidget.style.removeProperty('display')
-          chatbotWidget.style.removeProperty('visibility')
-          chatbotWidget.style.removeProperty('opacity')
-        }
+        selectors.forEach((selector) => {
+          try {
+            const elements = document.querySelectorAll(selector)
+            elements.forEach((el) => {
+              if (el instanceof HTMLElement) {
+                // Restaurar estilos para mostrar el chatbot
+                el.style.removeProperty('display')
+                el.style.removeProperty('visibility')
+                el.style.removeProperty('opacity')
+                el.style.removeProperty('pointer-events')
+                el.style.removeProperty('position')
+                el.style.removeProperty('top')
+                el.style.removeProperty('left')
+                el.style.removeProperty('z-index')
+              }
+            })
+          } catch (e) {
+            // Ignorar errores de selector
+          }
+        })
         
         // Ocultar mensajes de error del chatbot (pero mantener el widget visible)
         const errorMessages = document.querySelectorAll('.inmobiliaria-chatbot-widget [class*="error"], .inmobiliaria-chatbot-widget [class*="Error"]')
@@ -50,10 +71,20 @@ export function ChatbotCleanup() {
             }
           }
         })
+        
+        // Si el widget no existe, intentar cargarlo (solo si el script ya está disponible)
+        if (typeof window !== 'undefined' && (window as any).INMOBILIARIA_CHATBOT_API) {
+          // El script ya está configurado, el widget debería cargarse automáticamente
+          // Solo verificamos que no se haya destruido
+          if ((window as any).inmobiliariaChatbotWidget && typeof (window as any).inmobiliariaChatbotWidget.destroy === 'function') {
+            // El widget existe y está disponible, no hacer nada
+          }
+        }
+        
         return // No ocultar nada si estás en la página correcta
       }
       
-      // Si NO estás en la página de inmobiliaria, ocultar/destruir el chatbot de forma agresiva
+      // Si NO estás en la página de inmobiliaria, ocultar el chatbot (pero NO destruirlo para mantener el estado)
       // Buscar todos los posibles elementos del chatbot con múltiples selectores
       const selectors = [
         '.inmobiliaria-chatbot-button',
@@ -75,6 +106,7 @@ export function ChatbotCleanup() {
           const elements = document.querySelectorAll(selector)
           elements.forEach((el) => {
             if (el instanceof HTMLElement) {
+              // Solo ocultar, NO destruir para mantener el estado del chat
               el.style.display = 'none'
               el.style.visibility = 'hidden'
               el.style.opacity = '0'
@@ -90,23 +122,8 @@ export function ChatbotCleanup() {
         }
       })
       
-      // Intentar destruir el widget si existe
-      if (typeof window !== 'undefined') {
-        try {
-          // Intentar múltiples formas de destruir el widget
-          if ((window as any).inmobiliariaChatbotWidget?.destroy) {
-            (window as any).inmobiliariaChatbotWidget.destroy()
-          }
-          if ((window as any).chatbotWidget?.destroy) {
-            (window as any).chatbotWidget.destroy()
-          }
-          if ((window as any).destroyChatbot) {
-            (window as any).destroyChatbot()
-          }
-        } catch (e) {
-          // Ignorar errores al destruir
-        }
-      }
+      // NO destruir el widget para mantener el estado del chat cuando vuelvas a inmobiliaria
+      // Solo ocultarlo visualmente
     }
     
     // Ejecutar inmediatamente

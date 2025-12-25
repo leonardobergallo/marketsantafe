@@ -9,9 +9,10 @@ import { getListings, type ListingFilters } from '@/lib/db-queries'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Filter, Building2 } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { InmobiliariaFiltersPanel } from '@/components/inmobiliaria-filters-panel'
+import { ChatbotErrorHandler } from '@/components/chatbot-error-handler'
+import Script from 'next/script'
 
 interface BuscarInmobiliariaPageProps {
   searchParams?: {
@@ -74,32 +75,24 @@ export default async function BuscarInmobiliariaPage({ searchParams }: BuscarInm
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
-        {/* Banner inmobiliaria */}
-        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[300px] lg:h-[380px] xl:h-[450px] 2xl:h-[520px] mb-6 sm:mb-8">
-          <Image
-            src="/banner_mercado.png"
-            alt="Inmobiliaria en Equipo - Propiedades en Santa Fe"
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+        {/* Hero Section con texto - Solo para búsqueda */}
+        <section className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background py-12 md:py-16 mb-6 sm:mb-8">
+          <div className="container mx-auto px-4 sm:px-6 md:px-8">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/20 mb-4 md:mb-6">
+                <Building2 className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 md:mb-4">
                 Buscar Propiedades
               </h1>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                Encontrá tu propiedad ideal en Santa Fe
+              </p>
             </div>
-            <p className="text-muted-foreground">
-              Encontrá la propiedad ideal en Santa Fe
-            </p>
           </div>
+        </section>
 
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
           {/* Buscador principal */}
           <div className="mb-6">
             <div className="max-w-2xl mx-auto">
@@ -175,6 +168,53 @@ export default async function BuscarInmobiliariaPage({ searchParams }: BuscarInm
         </div>
       </main>
       <Footer />
+
+      {/* Handler para silenciar errores del chatbot */}
+      <ChatbotErrorHandler />
+
+      {/* Chatbot Widget - Cargar en todas las páginas de inmobiliaria */}
+      <Script id="chatbot-config" strategy="beforeInteractive">
+        {`(function() {
+          // Configurar la URL del servidor ANTES de cargar el widget
+          window.INMOBILIARIA_CHATBOT_API = window.location.origin;
+          
+          // Interceptar fetch para redirigir peticiones al servidor externo hacia proxy local
+          if (!window.__chatbotFetchIntercepted) {
+            window.__chatbotFetchIntercepted = true;
+            
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+              const url = args[0];
+              if (typeof url === 'string' && url.includes('inmobiliariaenquipo.vercel.app')) {
+                const proxyUrl = url.replace(
+                  'https://inmobiliariaenquipo.vercel.app',
+                  window.location.origin
+                );
+                const newArgs = [proxyUrl, ...Array.from(args).slice(1)];
+                return originalFetch.apply(this, newArgs);
+              }
+              return originalFetch.apply(this, args);
+            };
+            
+            const originalXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+              if (typeof url === 'string' && url.includes('inmobiliariaenquipo.vercel.app')) {
+                const proxyUrl = url.replace(
+                  'https://inmobiliariaenquipo.vercel.app',
+                  window.location.origin
+                );
+                return originalXHROpen.call(this, method, proxyUrl, ...rest);
+              }
+              return originalXHROpen.call(this, method, url, ...rest);
+            };
+          }
+        })();`}
+      </Script>
+      <Script
+        id="chatbot-widget-script"
+        src="https://inmobiliariaenquipo.vercel.app/chatbot-widget.js"
+        strategy="afterInteractive"
+      />
     </div>
   )
 }
