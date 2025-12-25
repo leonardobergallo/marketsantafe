@@ -32,6 +32,7 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
   const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
   
   // Convertimos los searchParams a filtros
+  // Excluir categorías inmobiliarias (1: Alquileres, 2: Inmuebles)
   const filters: ListingFilters = {
     q: resolvedParams.q || undefined,
     category: resolvedParams.cat || undefined,
@@ -39,6 +40,7 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
     min: resolvedParams.min ? Number(resolvedParams.min) : undefined,
     max: resolvedParams.max ? Number(resolvedParams.max) : undefined,
     condition: (resolvedParams.cond as ListingFilters['condition']) || undefined,
+    excludeCategories: ['1', '2'], // Excluir alquileres e inmuebles del mercado
   }
 
   // Obtener listings de la base de datos

@@ -57,23 +57,12 @@ export function ZoneSelector() {
   const selectedZoneName = zones.find((z) => z.id === selectedZone)?.name || 'Toda la ciudad'
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Badge zona Santa Fe - completo sin cortes, más grande */}
-      <div className="relative w-auto h-12 sm:h-14 md:h-16 flex-shrink-0">
-        <Image
-          src="/badge_zona_santafe.png"
-          alt="Zona Santa Fe"
-          width={180}
-          height={64}
-          className="object-contain h-full w-auto"
-          priority
-        />
-      </div>
-      <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+    <div className="flex items-center gap-2">
+      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
       <Select value={selectedZone} onValueChange={handleZoneChange}>
-        <SelectTrigger className="w-[180px] sm:w-[200px] border-none shadow-none focus:ring-0 h-auto p-0">
+        <SelectTrigger className="w-[140px] sm:w-[160px] border border-border bg-background hover:bg-muted/50 h-9 text-sm">
           <SelectValue>
-            <span className="text-sm sm:text-base font-medium text-foreground">{selectedZoneName}</span>
+            <span className="text-sm font-medium text-foreground truncate">{selectedZoneName}</span>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

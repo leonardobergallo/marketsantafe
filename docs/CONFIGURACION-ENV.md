@@ -138,3 +138,4 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_google_maps
 - Verifica que tu API key tenga los permisos correctos
 
 
+

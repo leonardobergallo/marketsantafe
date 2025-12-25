@@ -15,6 +15,7 @@ export interface User {
   business_name: string | null
   avatar_url: string | null
   verified: boolean
+  is_inmobiliaria_agent?: boolean // Agente de inmobiliaria
   created_at: Date
   updated_at: Date
 }
@@ -43,7 +44,8 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     const user = await queryOne<User>(
-      `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, created_at, updated_at 
+      `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, 
+              COALESCE(is_inmobiliaria_agent, false) as is_inmobiliaria_agent, created_at, updated_at 
        FROM users 
        WHERE id = $1`,
       [parseInt(userId)]
@@ -81,7 +83,8 @@ interface UserWithPassword extends User {
 // Obtener usuario por email (con password para verificación)
 export async function getUserByEmail(email: string): Promise<UserWithPassword | null> {
   return queryOne<UserWithPassword>(
-    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, created_at, updated_at, password_hash 
+    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, 
+            COALESCE(is_inmobiliaria_agent, false) as is_inmobiliaria_agent, created_at, updated_at, password_hash 
      FROM users 
      WHERE email = $1`,
     [email]
@@ -91,7 +94,8 @@ export async function getUserByEmail(email: string): Promise<UserWithPassword | 
 // Obtener usuario por ID
 export async function getUserById(id: number): Promise<User | null> {
   return queryOne<User>(
-    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, created_at, updated_at 
+    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, 
+            COALESCE(is_inmobiliaria_agent, false) as is_inmobiliaria_agent, created_at, updated_at 
      FROM users 
      WHERE id = $1`,
     [id]

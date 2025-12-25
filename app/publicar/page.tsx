@@ -240,7 +240,12 @@ export default function PublicarPage() {
       }
 
       toast.success('¡Restaurante creado exitosamente!')
-      router.push('/comer')
+      // Redirigir a gestionar el menú del restaurante
+      if (result.restaurant?.id) {
+        router.push(`/restaurantes/${result.restaurant.id}/menu`)
+      } else {
+        router.push('/comer')
+      }
     } catch (error) {
       console.error('Error al publicar:', error)
       toast.error('Error al crear el restaurante')

@@ -15,8 +15,9 @@ import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PhoneInput } from '@/components/ui/phone-input'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle, Gift, Sparkles } from 'lucide-react'
 import { emailSchema, phoneSchema, whatsappSchema, nameSchema } from '@/lib/validations'
 
 // Schema de validación
@@ -181,12 +182,43 @@ export default function RegistroPage() {
         return
       }
 
-      toast.success('¡Registro exitoso! Redirigiendo...')
+      toast.success('¡Registro exitoso!', {
+        description: 'Se te asignó automáticamente 1 mes gratis. ¡Empezá a publicar ahora!',
+        duration: 5000,
+      })
       
-      // Redirigir a login después de 1 segundo
-      setTimeout(() => {
-        router.push('/login')
-      }, 1000)
+      // Crear sesión automáticamente después del registro
+      try {
+        const loginResponse = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        })
+
+        if (loginResponse.ok) {
+          // Redirigir a mis ventas o publicar después de 1 segundo
+          setTimeout(() => {
+            router.push('/mis-ventas')
+            router.refresh()
+          }, 1500)
+        } else {
+          // Si falla el login automático, redirigir a login
+          setTimeout(() => {
+            router.push('/login')
+          }, 1500)
+        }
+      } catch (error) {
+        console.error('Error en login automático:', error)
+        // Redirigir a login si hay error
+        setTimeout(() => {
+          router.push('/login')
+        }, 1500)
+      }
     } catch (error) {
       console.error('Error en registro:', error)
       toast.error('Error al registrar usuario')
@@ -213,6 +245,48 @@ export default function RegistroPage() {
             Registrate para publicar y contactar directamente
           </p>
         </div>
+
+        {/* Banner promocional - 1 mes gratis */}
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-background">
+          <div className="p-4 md:p-6">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Gift className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg md:text-xl font-bold text-foreground">
+                    ¡1 Mes Gratis al Registrarte!
+                  </h3>
+                  <Badge className="bg-primary text-primary-foreground animate-pulse">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Promoción
+                  </Badge>
+                </div>
+                <p className="text-sm md:text-base text-muted-foreground mb-2">
+                  Al crear tu cuenta, recibís automáticamente <strong className="text-foreground">1 mes de acceso gratuito</strong> con todas las funcionalidades:
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 mb-3">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Publicaciones ilimitadas</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Hasta 10 fotos por publicación</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Acceso completo sin costo</span>
+                  </li>
+                </ul>
+                <p className="text-xs text-muted-foreground">
+                  ⚠️ Oferta limitada - Solo para primeros usuarios. Sin tarjeta de crédito requerida.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <Card className="p-6 md:p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

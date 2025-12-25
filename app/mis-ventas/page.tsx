@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { ListingCard } from '@/components/listing-card'
+import { FreePlanBannerClient } from '@/components/free-plan-banner-client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -118,6 +119,9 @@ export default function MisVentasPage() {
             </Button>
           </div>
         </div>
+
+        {/* Banner de plan gratuito */}
+        <FreePlanBannerClient />
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">

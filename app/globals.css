@@ -125,3 +125,101 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos para hacer el chatbot más discreto y profesional */
+.inmobiliaria-chatbot-button {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  opacity: 0.9 !important;
+  transition: all 0.3s ease !important;
+}
+
+.inmobiliaria-chatbot-button:hover {
+  opacity: 1 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.inmobiliaria-chatbot-button svg,
+.inmobiliaria-chatbot-button img {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+/* Modal del chatbot - más compacto y elegante */
+.inmobiliaria-chatbot-widget {
+  width: 380px !important;
+  max-width: 90vw !important;
+  height: 520px !important;
+  max-height: 85vh !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Header del chatbot - más pequeño y profesional */
+.inmobiliaria-chatbot-header {
+  padding: 14px 18px !important;
+  font-size: 15px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Área de mensajes - más compacta */
+.inmobiliaria-chatbot-messages {
+  padding: 16px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* Input del chatbot - más pequeño */
+.inmobiliaria-chatbot-input {
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+}
+
+/* Botones del chatbot - más pequeños */
+.inmobiliaria-chatbot-button-send {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+}
+
+/* Ocultar en móvil muy pequeño para no interferir */
+@media (max-width: 480px) {
+  .inmobiliaria-chatbot-button {
+    width: 44px !important;
+    height: 44px !important;
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+  
+  .inmobiliaria-chatbot-widget {
+    width: calc(100vw - 32px) !important;
+    height: calc(100vh - 100px) !important;
+    max-height: 80vh !important;
+  }
+}
+
+/* Ocultar errores del chatbot */
+.inmobiliaria-chatbot-widget [class*="error"],
+.inmobiliaria-chatbot-widget [class*="Error"],
+.inmobiliaria-chatbot-widget [class*="error-message"],
+.inmobiliaria-chatbot-widget [class*="errorMessage"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Ocultar errores del chatbot pero mantener el widget visible en inmobiliaria */
+.inmobiliaria-chatbot-widget [class*="error"]:not(.inmobiliaria-chatbot-button),
+.inmobiliaria-chatbot-widget [class*="Error"]:not(.inmobiliaria-chatbot-button) {
+  display: none !important;
+  visibility: hidden !important;
+}

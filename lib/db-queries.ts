@@ -9,6 +9,7 @@ export interface ListingFilters {
   min?: number
   max?: number
   condition?: 'nuevo' | 'usado' | 'reacondicionado'
+  excludeCategories?: string[] // IDs de categorías a excluir
 }
 
 export async function getListings(filters: ListingFilters = {}): Promise<Listing[]> {
@@ -95,6 +96,18 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       paramCount++
       query += ` AND l.condition = $${paramCount}`
       params.push(filters.condition)
+    }
+
+    // Excluir categorías específicas (ej: excluir inmobiliaria del mercado)
+    if (filters.excludeCategories && filters.excludeCategories.length > 0) {
+      const excludeIds = filters.excludeCategories.map(id => parseInt(id)).filter(id => !isNaN(id))
+      if (excludeIds.length > 0) {
+        // Construir NOT IN con múltiples parámetros
+        const placeholders = excludeIds.map((_, idx) => `$${paramCount + idx + 1}`).join(', ')
+        query += ` AND c.id NOT IN (${placeholders})`
+        params.push(...excludeIds)
+        paramCount += excludeIds.length
+      }
     }
 
     // Ordenar por featured primero, luego por fecha

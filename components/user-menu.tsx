@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, User, Store, Package } from 'lucide-react'
+import { LogOut, User, Store, Package, Shield, Building2, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface User {
@@ -27,6 +27,7 @@ interface User {
   business_name: string | null
   avatar_url: string | null
   verified: boolean
+  is_inmobiliaria_agent?: boolean
 }
 
 export function UserMenu() {
@@ -39,34 +40,61 @@ export function UserMenu() {
   }, [])
 
   const fetchUser = async () => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 segundos timeout
+    
     try {
-      const response = await fetch('/api/auth/me')
+      const response = await fetch('/api/auth/me', {
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
+      } else if (response.status === 401) {
+        // 401 es normal cuando no hay sesión, no es un error
+        setUser(null)
       }
-    } catch (error) {
-      console.error('Error fetching user:', error)
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      // Solo loguear errores que no sean de red normales o de autenticación
+      if (error.name !== 'AbortError' && error.name !== 'TypeError') {
+        // No loguear errores de autenticación (401) como errores
+        console.warn('Error fetching user:', error)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   const handleLogout = async () => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 segundos timeout
+    
     try {
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
+        signal: controller.signal,
       })
+      clearTimeout(timeoutId)
 
       if (response.ok) {
         toast.success('Sesión cerrada')
         setUser(null)
         router.push('/')
         router.refresh()
+      } else {
+        toast.error('Error al cerrar sesión')
       }
-    } catch (error) {
-      console.error('Error en logout:', error)
-      toast.error('Error al cerrar sesión')
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      if (error.name === 'AbortError') {
+        toast.error('Timeout al cerrar sesión. Intentá nuevamente.')
+      } else {
+        console.error('Error en logout:', error)
+        toast.error('Error al cerrar sesión')
+      }
     }
   }
 
@@ -146,6 +174,12 @@ export function UserMenu() {
                 {user.business_name}
               </p>
             )}
+            {user.is_inmobiliaria_agent && (
+              <p className="text-xs leading-none text-primary flex items-center gap-1 mt-1 font-medium">
+                <Building2 className="h-3 w-3" />
+                Agente Inmobiliario
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -156,11 +190,35 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link href="/inmobiliaria-en-equipo/mis-propiedades" className="cursor-pointer">
+            <Building2 className="mr-2 h-4 w-4" />
+            <span>Mis Propiedades</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link href="/publicar" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Publicar</span>
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/suscripciones" className="cursor-pointer">
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span>Mis Suscripciones</span>
+          </Link>
+        </DropdownMenuItem>
+        {/* Panel Chatbot solo para agentes de inmobiliaria */}
+        {user.is_inmobiliaria_agent && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin-chatbot" className="cursor-pointer">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Panel Chatbot</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

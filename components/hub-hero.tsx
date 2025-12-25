@@ -6,7 +6,7 @@
 
 import { Button } from '@/components/ui/button'
 import { ZoneSelector } from '@/components/zone-selector'
-import { ShoppingBag, UtensilsCrossed } from 'lucide-react'
+import { ShoppingBag, UtensilsCrossed, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -47,14 +47,14 @@ export function HubHero() {
             </div>
 
             {/* CTAs principales */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center pt-4">
               <Button
                 asChild
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all w-full sm:w-auto flex-1 sm:flex-none"
               >
                 <Link href="/mercado" className="flex items-center justify-center gap-2">
-                  <ShoppingBag className="h-5 w-5" />
+                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                   Ver mercado
                 </Link>
               </Button>
@@ -62,11 +62,22 @@ export function HubHero() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold transition-all w-full sm:w-auto"
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold transition-all w-full sm:w-auto flex-1 sm:flex-none"
               >
                 <Link href="/comer" className="flex items-center justify-center gap-2">
-                  <UtensilsCrossed className="h-5 w-5" />
+                  <UtensilsCrossed className="h-4 w-4 sm:h-5 sm:w-5" />
                   Qué comer hoy
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold transition-all w-full sm:w-auto flex-1 sm:flex-none"
+              >
+                <Link href="/inmobiliaria-en-equipo" className="flex items-center justify-center gap-2">
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Inmobiliaria
                 </Link>
               </Button>
             </div>

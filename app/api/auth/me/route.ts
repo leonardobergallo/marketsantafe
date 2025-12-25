@@ -27,6 +27,7 @@ export async function GET() {
           business_name: user.business_name,
           avatar_url: user.avatar_url,
           verified: user.verified,
+          is_inmobiliaria_agent: user.is_inmobiliaria_agent || false,
         },
       },
       { status: 200 }
