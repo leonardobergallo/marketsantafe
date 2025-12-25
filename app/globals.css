@@ -223,3 +223,21 @@
   display: none !important;
   visibility: hidden !important;
 }
+
+/* Ocultar el chatbot cuando NO estás en la página de inmobiliaria */
+body:not([data-inmobiliaria-page="true"]) [id*="chatbot"],
+body:not([data-inmobiliaria-page="true"]) [class*="chatbot-button"],
+body:not([data-inmobiliaria-page="true"]) [class*="chatbot-widget"],
+body:not([data-inmobiliaria-page="true"]) [class*="chatbot-modal"],
+body:not([data-inmobiliaria-page="true"]) [data-chatbot],
+body:not([data-inmobiliaria-page="true"]) iframe[src*="chatbot"],
+body:not([data-inmobiliaria-page="true"]) iframe[src*="inmobiliaria"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: fixed !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  z-index: -9999 !important;
+}
