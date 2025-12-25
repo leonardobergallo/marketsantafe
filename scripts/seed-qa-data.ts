@@ -355,9 +355,10 @@ async function seedQAData() {
     const inmueblesCategoryId = categoriesMap.get('inmuebles') || categoriesMap.values().next().value
 
     const properties = [
+      // ALQUILERES
       {
         title: 'Departamento 2 ambientes en Centro',
-        description: 'Departamento luminoso, 2 ambientes, cocina integrada, balcón. Excelente ubicación en el centro de Santa Fe.',
+        description: 'Departamento luminoso, 2 ambientes, cocina integrada, balcón. Excelente ubicación en el centro de Santa Fe. Expensas incluidas.',
         price: 150000,
         condition: null,
         categoryId: alquileresCategoryId,
@@ -367,7 +368,7 @@ async function seedQAData() {
       },
       {
         title: 'Casa 3 dormitorios en Barrio Norte',
-        description: 'Casa amplia, 3 dormitorios, patio, cochera. Ideal para familia.',
+        description: 'Casa amplia, 3 dormitorios, patio, cochera. Ideal para familia. Todos los servicios.',
         price: 250000,
         condition: null,
         categoryId: alquileresCategoryId,
@@ -376,13 +377,124 @@ async function seedQAData() {
         featured: false,
       },
       {
+        title: 'Departamento 1 ambiente en Centro',
+        description: 'Monoambiente moderno, totalmente equipado. Ideal para estudiantes o profesionales. Incluye servicios.',
+        price: 120000,
+        condition: null,
+        categoryId: alquileresCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[6].id,
+        featured: false,
+      },
+      {
+        title: 'Casa 4 dormitorios con piscina',
+        description: 'Hermosa casa con 4 dormitorios, 2 baños, cocina amplia, living comedor, patio con piscina y parrilla. Zona residencial tranquila.',
+        price: 350000,
+        condition: null,
+        categoryId: alquileresCategoryId,
+        zoneId: zoneIds['barrio-norte'],
+        userId: createdUsers[7].id,
+        featured: true,
+      },
+      {
+        title: 'Local comercial en Centro',
+        description: 'Local comercial de 80m² en pleno centro, ideal para negocio. Excelente ubicación con mucho tránsito.',
+        price: 180000,
+        condition: null,
+        categoryId: alquileresCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[6].id,
+        featured: false,
+      },
+      {
+        title: 'Departamento 3 ambientes en Barrio Sur',
+        description: 'Departamento cómodo, 3 ambientes, 2 dormitorios, balcón. Cerca de escuelas y comercios.',
+        price: 200000,
+        condition: null,
+        categoryId: alquileresCategoryId,
+        zoneId: zoneIds['barrio-sur'],
+        userId: createdUsers[7].id,
+        featured: false,
+      },
+      // VENTAS (INMUEBLES)
+      {
         title: 'Terreno 500m² en Barrio Sur',
-        description: 'Terreno plano, listo para construir. Excelente ubicación, servicios disponibles.',
+        description: 'Terreno plano, listo para construir. Excelente ubicación, servicios disponibles. Escritura al día.',
         price: 3500000,
         condition: null,
         categoryId: inmueblesCategoryId,
         zoneId: zoneIds['barrio-sur'],
         userId: createdUsers[6].id,
+        featured: true,
+      },
+      {
+        title: 'Casa en venta 3 dormitorios',
+        description: 'Casa para estrenar, 3 dormitorios, 2 baños, cocina moderna, patio con parrilla. Excelente estado.',
+        price: 85000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds['barrio-norte'],
+        userId: createdUsers[7].id,
+        featured: true,
+      },
+      {
+        title: 'Departamento 2 ambientes en venta',
+        description: 'Departamento en excelente estado, 2 ambientes, cocina integrada, balcón. Ubicación privilegiada.',
+        price: 45000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[6].id,
+        featured: false,
+      },
+      {
+        title: 'Terreno 300m² en Centro',
+        description: 'Terreno céntrico, ideal para construcción o inversión. Todos los servicios, escritura lista.',
+        price: 28000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[7].id,
+        featured: false,
+      },
+      {
+        title: 'Casa 5 dormitorios con quincho',
+        description: 'Casa amplia, 5 dormitorios, 3 baños, cocina grande, living, comedor, quincho con parrilla y piscina. Ideal para familia numerosa.',
+        price: 120000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds['barrio-norte'],
+        userId: createdUsers[6].id,
+        featured: true,
+      },
+      {
+        title: 'Local comercial en venta',
+        description: 'Local comercial de 120m² en zona comercial, excelente para negocio. Incluye depósito.',
+        price: 55000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[7].id,
+        featured: false,
+      },
+      {
+        title: 'Terreno 800m² en Barrio Norte',
+        description: 'Terreno amplio, plano, con árboles. Ideal para construir casa grande. Servicios disponibles.',
+        price: 42000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds['barrio-norte'],
+        userId: createdUsers[6].id,
+        featured: false,
+      },
+      {
+        title: 'Departamento 3 ambientes en venta',
+        description: 'Departamento moderno, 3 ambientes, 2 dormitorios, cocina integrada, balcón. Edificio con seguridad.',
+        price: 65000000,
+        condition: null,
+        categoryId: inmueblesCategoryId,
+        zoneId: zoneIds.centro,
+        userId: createdUsers[7].id,
         featured: true,
       },
     ]
@@ -603,7 +715,7 @@ async function seedQAData() {
     console.log(`   👥 Usuarios: ${createdUsers.length}`)
     console.log(`   💳 Suscripciones: ${createdUsers.length}`)
     console.log(`   📦 Listings: ${listings.length}`)
-    console.log(`   🏠 Propiedades: ${properties.length}`)
+    console.log(`   🏠 Propiedades: ${properties.length} (${properties.filter(p => p.categoryId === alquileresCategoryId).length} alquileres, ${properties.filter(p => p.categoryId === inmueblesCategoryId).length} ventas)`)
     console.log(`   🍔 Restaurantes: ${restaurantUsers.length > 0 ? '3' : '0'}`)
     console.log(`\n🔑 Credenciales de acceso (todos con contraseña: password123):`)
     createdUsers.forEach(user => {
