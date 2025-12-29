@@ -1,7 +1,7 @@
 // Página de registro de usuarios
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -14,10 +14,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { User, Store } from 'lucide-react'
 import { PhoneInput } from '@/components/ui/phone-input'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle, Gift, Sparkles } from 'lucide-react'
+import { ArrowLeft, Loader2, User, Store } from 'lucide-react'
 import { emailSchema, phoneSchema, whatsappSchema, nameSchema } from '@/lib/validations'
 
 // Schema de validación
@@ -39,7 +39,10 @@ const registerSchema = z
     phone: phoneSchema,
     whatsapp: whatsappSchema,
     is_business: z.boolean().default(false),
-    business_name: z.string().default(''),
+    business_name: z
+      .string()
+      .optional()
+      .or(z.literal('')),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
@@ -49,7 +52,7 @@ const registerSchema = z
     (data) => {
       // Si es negocio, el nombre es requerido
       if (data.is_business) {
-        return data.business_name && typeof data.business_name === 'string' && data.business_name.trim() !== ''
+        return data.business_name && data.business_name.trim() !== ''
       }
       return true
     },
@@ -64,77 +67,58 @@ type RegisterFormData = z.infer<typeof registerSchema>
 export default function RegistroPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [emailStatus, setEmailStatus] = useState<{
-    checking: boolean
-    exists: boolean | null
-    valid: boolean | null
-  }>({
-    checking: false,
-    exists: null,
-    valid: null,
-  })
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isValid, isDirty },
+    trigger,
+    setError,
+    clearErrors,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange', // Validar en tiempo real mientras el usuario escribe
     defaultValues: {
       is_business: false,
     },
   })
 
   const isBusiness = watch('is_business')
-  const emailValue = watch('email')
+  const email = watch('email')
 
-  // Verificar email en tiempo real con debounce
-  useEffect(() => {
-    if (!emailValue || emailValue.trim() === '') {
-      setEmailStatus({ checking: false, exists: null, valid: null })
+  // Validar email en tiempo real cuando el usuario termine de escribir
+  const checkEmailExists = async (emailValue: string) => {
+    if (!emailValue || !emailValue.includes('@')) {
+      clearErrors('email')
       return
     }
-
-    // Validar formato básico antes de hacer la petición
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(emailValue)) {
-      setEmailStatus({ checking: false, exists: null, valid: false })
-      return
-    }
-
-    // Debounce: esperar 500ms después de que el usuario deje de escribir
-    const timeoutId = setTimeout(async () => {
-      setEmailStatus({ checking: true, exists: null, valid: null })
-
-      try {
-        const response = await fetch(`/api/auth/check-email?email=${encodeURIComponent(emailValue)}`)
-        const data = await response.json()
-
-        if (response.ok) {
-          setEmailStatus({
-            checking: false,
-            exists: data.exists,
-            valid: data.valid,
+    
+    try {
+      const response = await fetch(`/api/auth/check-email?email=${encodeURIComponent(emailValue)}`)
+      if (response.ok) {
+        const result = await response.json()
+        if (result.exists) {
+          setError('email', {
+            type: 'manual',
+            message: 'Este email ya está registrado',
           })
-
-          if (data.exists) {
-            toast.error('Este email ya está registrado', {
-              description: '¿Querés iniciar sesión en su lugar?',
-              duration: 4000,
-            })
-          }
+          toast.error('Este email ya está registrado. ¿Querés iniciar sesión?', {
+            action: {
+              label: 'Ir a login',
+              onClick: () => router.push('/login'),
+            },
+          })
+          return true
         } else {
-          setEmailStatus({ checking: false, exists: null, valid: false })
+          clearErrors('email')
         }
-      } catch (error) {
-        console.error('Error verificando email:', error)
-        setEmailStatus({ checking: false, exists: null, valid: null })
       }
-    }, 500)
-
-    return () => clearTimeout(timeoutId)
-  }, [emailValue])
+    } catch (error) {
+      // Silenciar errores de verificación
+    }
+    return false
+  }
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true)
@@ -166,15 +150,19 @@ export default function RegistroPage() {
           const errorMessages = result.details.map((d: any) => d.message).join(', ')
           toast.error(errorMessages || result.error || 'Error al registrar usuario')
         } else if (response.status === 409) {
-          // Error de conflicto (email ya existe)
-          toast.error('Este email ya está registrado', {
-            description: '¿Querés iniciar sesión en su lugar?',
-            duration: 5000,
-            action: {
-              label: 'Ir a login',
-              onClick: () => router.push('/login'),
-            },
-          })
+          // Email ya registrado - solo mostrar si no se mostró antes
+          if (!errors.email) {
+            setError('email', {
+              type: 'manual',
+              message: 'Este email ya está registrado',
+            })
+            toast.error('Este email ya está registrado. ¿Querés iniciar sesión?', {
+              action: {
+                label: 'Ir a login',
+                onClick: () => router.push('/login'),
+              },
+            })
+          }
         } else {
           toast.error(result.error || 'Error al registrar usuario')
         }
@@ -182,43 +170,12 @@ export default function RegistroPage() {
         return
       }
 
-      toast.success('¡Registro exitoso!', {
-        description: 'Se te asignó automáticamente 1 mes gratis. ¡Empezá a publicar ahora!',
-        duration: 5000,
-      })
+      toast.success('¡Registro exitoso! Redirigiendo...')
       
-      // Crear sesión automáticamente después del registro
-      try {
-        const loginResponse = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        })
-
-        if (loginResponse.ok) {
-          // Redirigir a mis ventas o publicar después de 1 segundo
-          setTimeout(() => {
-            router.push('/mis-ventas')
-            router.refresh()
-          }, 1500)
-        } else {
-          // Si falla el login automático, redirigir a login
-          setTimeout(() => {
-            router.push('/login')
-          }, 1500)
-        }
-      } catch (error) {
-        console.error('Error en login automático:', error)
-        // Redirigir a login si hay error
-        setTimeout(() => {
-          router.push('/login')
-        }, 1500)
-      }
+      // Redirigir a login después de 1 segundo
+      setTimeout(() => {
+        router.push('/login')
+      }, 1000)
     } catch (error) {
       console.error('Error en registro:', error)
       toast.error('Error al registrar usuario')
@@ -246,48 +203,6 @@ export default function RegistroPage() {
           </p>
         </div>
 
-        {/* Banner promocional - 1 mes gratis */}
-        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-background">
-          <div className="p-4 md:p-6">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <Gift className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-lg md:text-xl font-bold text-foreground">
-                    ¡1 Mes Gratis al Registrarte!
-                  </h3>
-                  <Badge className="bg-primary text-primary-foreground animate-pulse">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    Promoción
-                  </Badge>
-                </div>
-                <p className="text-sm md:text-base text-muted-foreground mb-2">
-                  Al crear tu cuenta, recibís automáticamente <strong className="text-foreground">1 mes de acceso gratuito</strong> con todas las funcionalidades:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 mb-3">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>Publicaciones ilimitadas</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>Hasta 10 fotos por publicación</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <span>Acceso completo sin costo</span>
-                  </li>
-                </ul>
-                <p className="text-xs text-muted-foreground">
-                  ⚠️ Oferta limitada - Solo para primeros usuarios. Sin tarjeta de crédito requerida.
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
         <Card className="p-6 md:p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Nombre */}
@@ -311,53 +226,24 @@ export default function RegistroPage() {
               <Label htmlFor="email">
                 Email <span className="text-destructive">*</span>
               </Label>
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  placeholder="tu@email.com"
-                  disabled={isSubmitting}
-                  className={
-                    emailStatus.exists
-                      ? 'border-destructive pr-10'
-                      : emailStatus.exists === false && emailStatus.valid
-                      ? 'border-green-500 pr-10'
-                      : ''
-                  }
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {emailStatus.checking ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  ) : emailStatus.exists ? (
-                    <XCircle className="h-4 w-4 text-destructive" />
-                  ) : emailStatus.exists === false && emailStatus.valid ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : null}
-                </div>
-              </div>
+              <Input
+                id="email"
+                type="email"
+                {...register('email', {
+                  onBlur: async () => {
+                    // Validar email cuando el usuario sale del campo
+                    await trigger('email')
+                    if (email && !errors.email) {
+                      await checkEmailExists(email)
+                    }
+                  },
+                })}
+                placeholder="tu@email.com"
+                disabled={isSubmitting}
+                className={errors.email ? 'border-destructive' : ''}
+              />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-              {emailStatus.exists && !errors.email && (
-                <div className="flex items-start gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Este email ya está registrado</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ¿Ya tenés cuenta?{' '}
-                      <Link href="/login" className="text-primary hover:underline font-medium">
-                        Iniciar sesión
-                      </Link>
-                    </p>
-                  </div>
-                </div>
-              )}
-              {emailStatus.exists === false && emailStatus.valid && !errors.email && (
-                <p className="text-sm text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Email disponible
-                </p>
               )}
             </div>
 
@@ -431,19 +317,90 @@ export default function RegistroPage() {
               </p>
             </div>
 
-            {/* Es negocio */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_business"
-                {...register('is_business')}
-                disabled={isSubmitting}
-              />
-              <Label
-                htmlFor="is_business"
-                className="text-sm font-normal cursor-pointer"
-              >
-                Soy un negocio
-              </Label>
+            {/* Tipo de cuenta */}
+            <div className="space-y-4 pt-4 border-t">
+              <Label className="text-base font-semibold">Tipo de cuenta</Label>
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card 
+                  className={`p-4 cursor-pointer border-2 transition-all ${
+                    !isBusiness 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => {
+                    setValue('is_business', false)
+                    setValue('business_name', '')
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Checkbox
+                          id="is_individual"
+                          checked={!isBusiness}
+                          onCheckedChange={(checked) => {
+                            setValue('is_business', !checked)
+                            if (checked) {
+                              setValue('business_name', '')
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        />
+                        <Label htmlFor="is_individual" className="cursor-pointer font-semibold text-foreground">
+                          Usuario Individual
+                        </Label>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-7">
+                        Para particulares que quieren vender o alquilar
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card 
+                  className={`p-4 cursor-pointer border-2 transition-all ${
+                    isBusiness 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => {
+                    setValue('is_business', true)
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Store className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Checkbox
+                          id="is_business"
+                          checked={isBusiness}
+                          onCheckedChange={(checked) => {
+                            setValue('is_business', checked === true)
+                            if (!checked) {
+                              setValue('business_name', '')
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        />
+                        <Label htmlFor="is_business" className="cursor-pointer font-semibold text-foreground">
+                          Negocio
+                        </Label>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-7">
+                        Para empresas, tiendas y comercios
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Podés cambiar esto después en tu perfil
+              </p>
             </div>
 
             {/* Nombre del negocio (solo si es negocio) */}
@@ -470,7 +427,7 @@ export default function RegistroPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (!isValid && isDirty)}
             >
               {isSubmitting ? (
                 <>

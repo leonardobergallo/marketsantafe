@@ -15,7 +15,7 @@ import { MapPin, Calendar } from 'lucide-react'
 import { SafeImage } from './safe-image'
 
 interface ListingCardProps {
-  listing: Listing
+  readonly listing: Listing
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
@@ -46,20 +46,23 @@ export function ListingCard({ listing }: ListingCardProps) {
           {/* Si hay múltiples imágenes, mostrar galería pequeña */}
           {listing.images && listing.images.length > 1 ? (
             <div className="grid grid-cols-2 gap-1 h-full">
-              {listing.images.slice(0, 3).map((img, idx) => (
-                <div key={idx} className="relative overflow-hidden">
-                  <SafeImage
-                    src={img}
-                    alt={`${listing.title} ${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
-                  {idx === 0 && listing.images.length > 3 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">+{listing.images.length - 3}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
+              {listing.images.slice(0, 3).map((img, idx) => {
+                const imageKey = `${listing.id}-${img}-${idx}`
+                return (
+                  <div key={imageKey} className="relative overflow-hidden">
+                    <SafeImage
+                      src={img}
+                      alt={`${listing.title} ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                    {idx === 0 && listing.images && listing.images.length > 3 && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">+{listing.images.length - 3}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <SafeImage

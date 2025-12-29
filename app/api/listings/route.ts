@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const min = searchParams.get('min') ? parseFloat(searchParams.get('min')!) : undefined
     const max = searchParams.get('max') ? parseFloat(searchParams.get('max')!) : undefined
     const condition = searchParams.get('cond') || undefined
+    const store_id = searchParams.get('store_id') ? parseInt(searchParams.get('store_id')!) : undefined
 
     // Construir query
     let query = `
@@ -88,6 +89,13 @@ export async function GET(request: NextRequest) {
       paramCount++
       query += ` AND l.condition = $${paramCount}`
       params.push(condition)
+    }
+
+    // Filtro por tienda
+    if (store_id !== undefined) {
+      paramCount++
+      query += ` AND l.store_id = $${paramCount}`
+      params.push(store_id)
     }
 
     // Ordenar por featured primero, luego por fecha

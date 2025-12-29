@@ -4,7 +4,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 import { hashPassword } from '@/lib/auth'
-import { assignFreePlanToUser } from '@/lib/subscription-strategy'
 import { z } from 'zod'
 
 // Schema de validación
@@ -80,14 +79,6 @@ export async function POST(request: NextRequest) {
     )
 
     const user = result.rows[0]
-
-    // Asignar plan gratuito automáticamente si está en período promocional
-    try {
-      await assignFreePlanToUser(user.id)
-    } catch (error) {
-      console.error('Error asignando plan gratis:', error)
-      // No fallar el registro si falla la asignación del plan
-    }
 
     return NextResponse.json(
       {

@@ -11,7 +11,7 @@ import { BusinessSection } from '@/components/business-section'
 import { getListings, type ListingFilters } from '@/lib/db-queries'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, UtensilsCrossed, Building2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 interface HomeProps {
   searchParams?: {
@@ -24,10 +24,8 @@ export default async function Home({ searchParams }: HomeProps) {
   const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
   
   // Obtener listings destacados con filtro de zona si existe
-  // Excluir propiedades inmobiliarias del home
   const filters: ListingFilters = {
     zone: resolvedParams.zone || undefined,
-    excludeCategories: ['1', '2'], // Excluir alquileres e inmuebles
   }
   
   const allListings = await getListings(filters)
@@ -76,8 +74,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </section>
 
-        {/* Qué comer cerca tuyo */}
-        <section className="bg-muted/30 py-12 md:py-16 lg:py-20">
+        {/* Qué comer cerca tuyo - Oculto para segunda etapa */}
+        {/* <section className="bg-muted/30 py-12 md:py-16 lg:py-20">
           <div className="container mx-auto px-4 sm:px-6 md:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -97,7 +95,6 @@ export default async function Home({ searchParams }: HomeProps) {
               </Button>
             </div>
 
-            {/* Placeholder para restaurantes - se implementará con datos reales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="bg-card border border-border rounded-lg p-6 text-center">
                 <p className="text-muted-foreground text-sm">
@@ -115,61 +112,7 @@ export default async function Home({ searchParams }: HomeProps) {
               </Button>
             </div>
           </div>
-        </section>
-
-        {/* Propiedades Inmobiliarias - Sección ligera */}
-        <section className="container mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center gap-2">
-                <Building2 className="h-6 w-6 sm:h-8 sm:w-8" />
-                Propiedades Inmobiliarias
-              </h2>
-              <p className="text-muted-foreground">
-                Alquileres, ventas y terrenos en Santa Fe
-              </p>
-            </div>
-            <Button asChild variant="ghost" className="hidden sm:flex">
-              <Link href="/inmobiliaria-en-equipo">
-                Ver todo
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          {/* CTA simple y directo */}
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-lg p-8 md:p-12 text-center">
-            <Building2 className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <h3 className="text-xl sm:text-2xl font-bold mb-3">
-              ¿Buscás o querés vender una propiedad?
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Encontrá tu propiedad ideal o publicá la tuya. Contamos con asistente virtual disponible 24/7.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg">
-                <Link href="/inmobiliaria-en-equipo">
-                  Ver Propiedades
-                  <Building2 className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/inmobiliaria-en-equipo/publicar">
-                  Publicar Propiedad
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          <div className="text-center mt-6 sm:hidden">
-            <Button asChild variant="outline" size="lg">
-              <Link href="/inmobiliaria-en-equipo">
-                Ver inmobiliaria
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        </section> */}
 
         {/* Categorías del Mercado */}
         <section className="container mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16 lg:py-20">

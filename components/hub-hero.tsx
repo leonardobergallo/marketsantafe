@@ -31,7 +31,7 @@ export function HubHero() {
               variant="outline"
               className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold transition-all w-full sm:w-auto bg-transparent"
             >
-              <a href="/negocios">Ver planes</a>
+              <a href="/planes">Ver planes</a>
             </Button>
           </div>
 

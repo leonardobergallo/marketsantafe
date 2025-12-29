@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
+import { checkCanPublish } from '@/lib/subscription-check'
 import { z } from 'zod'
 
 // Schema de validación
@@ -66,6 +67,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar límite de publicaciones
+    const limitCheck = await checkCanPublish(user.id, 'listing')
+    if (!limitCheck.allowed) {
+      if (limitCheck.reason === 'limit_reached') {
+        return NextResponse.json(
+          { 
+            error: 'Límite de publicaciones alcanzado',
+            current: limitCheck.current,
+            limit: limitCheck.limit,
+            message: `Tenés ${limitCheck.current}/${limitCheck.limit} publicaciones. Actualizá tu plan para publicar más.`
+          },
+          { status: 403 }
+        )
+      }
+      return NextResponse.json(
+        { error: 'No podés publicar. Verificá tu suscripción.' },
+        { status: 403 }
+      )
+    }
+
     // Preparar imágenes (máximo 3)
     const imagesArray = images && images.length > 0 
       ? images.slice(0, 3).filter(img => img && img.trim() !== '')
@@ -73,15 +94,26 @@ export async function POST(request: NextRequest) {
     
     const primaryImage = imagesArray.length > 0 ? imagesArray[0] : null
 
+    // Obtener tienda del usuario si existe
+    let storeId: number | null = null
+    const storeResult = await pool.query(
+      'SELECT id FROM stores WHERE user_id = $1 AND active = true',
+      [user.id]
+    )
+    if (storeResult.rows.length > 0) {
+      storeId = storeResult.rows[0].id
+    }
+
     // Insertar listing
     const result = await pool.query(
-      `INSERT INTO listings (user_id, category_id, zone_id, title, description, price, currency, condition, whatsapp, phone, email, instagram, image_url, images, active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      `INSERT INTO listings (user_id, category_id, zone_id, store_id, title, description, price, currency, condition, whatsapp, phone, email, instagram, image_url, images, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING id, title, created_at`,
       [
         user.id,
         categoryIdNum,
         zoneIdNum,
+        storeId,
         title,
         description,
         price ? parseFloat(price) : 0,

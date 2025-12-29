@@ -77,9 +77,17 @@ async function setupDatabase() {
         ) THEN
           ALTER TABLE users ADD COLUMN verified BOOLEAN DEFAULT FALSE;
         END IF;
+
+        -- Agregar store_id a listings si no existe
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'listings' AND column_name = 'store_id'
+        ) THEN
+          ALTER TABLE listings ADD COLUMN store_id INTEGER REFERENCES stores(id) ON DELETE SET NULL;
+        END IF;
       END $$;
     `)
-    console.log('✅ Campos de autenticación verificados/agregados')
+    console.log('✅ Campos de autenticación y store_id verificados/agregados')
 
     // Tabla de publicaciones del mercado
     await client.query(`
@@ -101,6 +109,65 @@ async function setupDatabase() {
       );
     `)
     console.log('✅ Tabla listings creada')
+
+    // Tabla de tiendas
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS stores (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        slug VARCHAR(200) NOT NULL UNIQUE,
+        description TEXT,
+        logo_url TEXT,
+        cover_image_url TEXT,
+        phone VARCHAR(20),
+        whatsapp VARCHAR(20),
+        email VARCHAR(255),
+        instagram VARCHAR(100),
+        address TEXT,
+        zone_id INTEGER REFERENCES zones(id) ON DELETE SET NULL,
+        active BOOLEAN DEFAULT TRUE,
+        verified BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `)
+    console.log('✅ Tabla stores creada')
+
+    // Tabla de propiedades inmobiliarias
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS properties (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        zone_id INTEGER REFERENCES zones(id) ON DELETE SET NULL,
+        category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('alquiler', 'venta', 'alquiler-temporal')),
+        title VARCHAR(200) NOT NULL,
+        description TEXT,
+        price DECIMAL(12, 2) NOT NULL,
+        currency VARCHAR(3) DEFAULT 'ARS',
+        rooms INTEGER,
+        bathrooms INTEGER,
+        area_m2 DECIMAL(10, 2),
+        address TEXT,
+        latitude DECIMAL(10, 8),
+        longitude DECIMAL(11, 8),
+        images TEXT, -- JSON array de URLs
+        image_url TEXT, -- Primera imagen
+        phone VARCHAR(20),
+        whatsapp VARCHAR(20),
+        email VARCHAR(255),
+        instagram VARCHAR(100),
+        professional_service BOOLEAN DEFAULT FALSE,
+        professional_service_requested_at TIMESTAMP,
+        featured BOOLEAN DEFAULT FALSE,
+        active BOOLEAN DEFAULT TRUE,
+        views INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `)
+    console.log('✅ Tabla properties creada')
 
       // Tabla de restaurantes/locales gastronómicos
       await client.query(`
@@ -163,6 +230,15 @@ async function setupDatabase() {
       CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category_id);
       CREATE INDEX IF NOT EXISTS idx_listings_active ON listings(active);
       CREATE INDEX IF NOT EXISTS idx_listings_featured ON listings(featured);
+      CREATE INDEX IF NOT EXISTS idx_listings_store ON listings(store_id);
+      CREATE INDEX IF NOT EXISTS idx_stores_user ON stores(user_id);
+      CREATE INDEX IF NOT EXISTS idx_stores_slug ON stores(slug);
+      CREATE INDEX IF NOT EXISTS idx_stores_active ON stores(active);
+      CREATE INDEX IF NOT EXISTS idx_properties_user ON properties(user_id);
+      CREATE INDEX IF NOT EXISTS idx_properties_zone ON properties(zone_id);
+      CREATE INDEX IF NOT EXISTS idx_properties_type ON properties(type);
+      CREATE INDEX IF NOT EXISTS idx_properties_active ON properties(active);
+      CREATE INDEX IF NOT EXISTS idx_properties_professional ON properties(professional_service);
       CREATE INDEX IF NOT EXISTS idx_restaurants_zone ON restaurants(zone_id);
       CREATE INDEX IF NOT EXISTS idx_restaurants_active ON restaurants(active);
       CREATE INDEX IF NOT EXISTS idx_menu_items_restaurant ON menu_items(restaurant_id);

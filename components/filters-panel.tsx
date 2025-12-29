@@ -120,11 +120,19 @@ export function FiltersPanel() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las categorías</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {category.name}
-              </SelectItem>
-            ))}
+            {categories
+              // En /mercado, excluir categorías de propiedades (Alquileres e Inmuebles)
+              .filter(cat => {
+                if (pathname === '/mercado') {
+                  return cat.slug !== 'alquileres' && cat.slug !== 'inmuebles'
+                }
+                return true
+              })
+              .map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>

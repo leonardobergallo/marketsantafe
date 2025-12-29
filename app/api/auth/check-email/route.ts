@@ -1,9 +1,8 @@
 // API route para verificar si un email ya está registrado
-// GET /api/auth/check-email?email=xxx
+// GET /api/auth/check-email?email=...
 
 import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
-import { z } from 'zod'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,19 +11,8 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'Email es requerido' },
+        { error: 'Email requerido' },
         { status: 400 }
-      )
-    }
-
-    // Validar formato de email
-    const emailSchema = z.string().email()
-    const validationResult = emailSchema.safeParse(email)
-    
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { exists: false, valid: false },
-        { status: 200 }
       )
     }
 
@@ -34,13 +22,9 @@ export async function GET(request: NextRequest) {
       [email.toLowerCase().trim()]
     )
 
-    return NextResponse.json(
-      {
-        exists: result.rows.length > 0,
-        valid: true,
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({
+      exists: result.rows.length > 0,
+    })
   } catch (error) {
     console.error('Error verificando email:', error)
     return NextResponse.json(
@@ -49,6 +33,4 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
-
 

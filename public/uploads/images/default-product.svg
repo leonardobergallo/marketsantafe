@@ -1,0 +1,38 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.2" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo con gradiente -->
+  <rect width="64" height="64" rx="12" fill="url(#grad1)" stroke="url(#grad2)" stroke-width="1"/>
+  
+  <!-- Icono de producto -->
+  <g transform="translate(16, 16)">
+    <!-- Cubo principal -->
+    <rect x="8" y="8" width="16" height="16" rx="2" fill="url(#grad2)" opacity="0.8"/>
+    
+    <!-- Sombra del cubo -->
+    <rect x="10" y="10" width="16" height="16" rx="2" fill="#1e293b" opacity="0.3"/>
+    
+    <!-- Líneas de detalle -->
+    <line x1="8" y1="8" x2="24" y2="8" stroke="#06b6d4" stroke-width="1.5" opacity="0.6"/>
+    <line x1="8" y1="24" x2="24" y2="24" stroke="#3b82f6" stroke-width="1.5" opacity="0.6"/>
+    <line x1="24" y1="8" x2="24" y2="24" stroke="#06b6d4" stroke-width="1.5" opacity="0.6"/>
+    
+    <!-- Puntos de conexión -->
+    <circle cx="12" cy="12" r="1.5" fill="#06b6d4" opacity="0.8"/>
+    <circle cx="20" cy="12" r="1.5" fill="#3b82f6" opacity="0.8"/>
+    <circle cx="12" cy="20" r="1.5" fill="#06b6d4" opacity="0.8"/>
+    <circle cx="20" cy="20" r="1.5" fill="#3b82f6" opacity="0.8"/>
+  </g>
+  
+  <!-- Texto "IT360" -->
+  <text x="32" y="56" text-anchor="middle" fill="#06b6d4" font-family="Arial, sans-serif" font-size="8" font-weight="bold" opacity="0.7">IT360</text>
+</svg>

@@ -7,10 +7,11 @@ import { Footer } from '@/components/footer'
 import { ListingCard } from '@/components/listing-card'
 import { FiltersPanel } from '@/components/filters-panel'
 import { SearchInput } from '@/components/search-input'
+import { ChatbotActivator } from '@/components/chatbot-activator'
 import { getListings, type ListingFilters } from '@/lib/db-queries'
 import { type Listing } from '@/lib/mockListings'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Filter } from 'lucide-react'
 import Image from 'next/image'
 
@@ -32,7 +33,6 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
   const resolvedParams = searchParams instanceof Promise ? await searchParams : (searchParams || {})
   
   // Convertimos los searchParams a filtros
-  // Excluir categorías inmobiliarias (1: Alquileres, 2: Inmuebles)
   const filters: ListingFilters = {
     q: resolvedParams.q || undefined,
     category: resolvedParams.cat || undefined,
@@ -40,7 +40,6 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
     min: resolvedParams.min ? Number(resolvedParams.min) : undefined,
     max: resolvedParams.max ? Number(resolvedParams.max) : undefined,
     condition: (resolvedParams.cond as ListingFilters['condition']) || undefined,
-    excludeCategories: ['1', '2'], // Excluir alquileres e inmuebles del mercado
   }
 
   // Obtener listings de la base de datos
@@ -49,9 +48,10 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <ChatbotActivator delay={2000} />
       <main className="flex-1">
         {/* Banner mercado - full ancho */}
-        <div className="relative w-full h-[180px] sm:h-[220px] md:h-[300px] lg:h-[380px] xl:h-[450px] 2xl:h-[520px] mb-6 sm:mb-8">
+        <div className="relative w-full h-[200px] md:h-[250px] lg:h-[300px] mb-8">
           <Image
             src="/banner_mercado.png"
             alt="Mercado - Lo que se vende cerca tuyo"
@@ -100,9 +100,6 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>Filtros</SheetTitle>
-                  </SheetHeader>
                   <FiltersPanel />
                 </SheetContent>
               </Sheet>

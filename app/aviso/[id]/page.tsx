@@ -12,12 +12,11 @@ import { type Listing } from '@/lib/mockListings'
 import { getCategoryById } from '@/lib/categories'
 import { getZoneById } from '@/lib/zones'
 import { formatPrice } from '@/lib/utils'
-import { ArrowLeft, Phone, MessageCircle, MapPin, Calendar, Edit2 } from 'lucide-react'
+import { ArrowLeft, Phone, MessageCircle, MapPin, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ImageGallery } from '@/components/image-gallery'
 import { SafeImage } from '@/components/safe-image'
-import { EditButtonClient } from '@/components/edit-button'
 
 interface AvisoPageProps {
   params: Promise<{
@@ -97,12 +96,9 @@ export default async function AvisoPage({ params }: AvisoPageProps) {
             {/* Información principal */}
             <Card className="p-6">
               <div className="mb-4">
-                <div className="flex items-start justify-between mb-4">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground flex-1">
-                    {listing.title}
-                  </h1>
-                  <EditButtonClient listingId={id} />
-                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+                  {listing.title}
+                </h1>
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   {category && (
                     <Badge variant="secondary">{category.name}</Badge>

@@ -101,8 +101,8 @@ export default function NegociosPage() {
                     <span>Gestión de inventario</span>
                   </li>
                 </ul>
-                <Button className="w-full" size="lg">
-                  Ver planes
+                <Button asChild className="w-full" size="lg">
+                  <Link href="/planes">Ver planes</Link>
                 </Button>
               </Card>
             </div>
@@ -162,7 +162,7 @@ export default function NegociosPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg">
-                <Link href="/publicar">Crear mi tienda</Link>
+                <Link href="/crear-tienda">Crear mi tienda</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link href="/explorar">Ver ejemplos</Link>
@@ -175,6 +175,10 @@ export default function NegociosPage() {
     </div>
   )
 }
+
+
+
+
 
 
 

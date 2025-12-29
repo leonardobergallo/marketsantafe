@@ -6,11 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { forwardRef, useState } from 'react'
 
 interface PriceInputWithCurrencyProps {
-  value?: string | number
+  value?: string
   currency?: 'ARS' | 'USD'
   onPriceChange?: (price: string) => void
   onCurrencyChange?: (currency: 'ARS' | 'USD') => void
-  onChange?: (price: string, currency: 'ARS' | 'USD') => void // Para compatibilidad
   disabled?: boolean
   className?: string
 }
@@ -20,16 +19,13 @@ export function PriceInputWithCurrency({
   currency = 'ARS',
   onPriceChange,
   onCurrencyChange,
-  onChange,
   disabled = false,
   className = '',
 }: PriceInputWithCurrencyProps) {
-  const formatPrice = (val: string | number | undefined): string => {
-    if (!val && val !== 0) return ''
-    // Convertir a string si es número
-    const valStr = typeof val === 'number' ? val.toString() : String(val || '')
+  const formatPrice = (val: string): string => {
+    if (!val) return ''
     // Remover todo excepto números y punto decimal
-    let cleaned = valStr.replace(/[^\d.]/g, '')
+    let cleaned = val.replace(/[^\d.]/g, '')
     
     // Solo permitir un punto decimal
     const parts = cleaned.split('.')
@@ -53,13 +49,10 @@ export function PriceInputWithCurrency({
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPrice(e.target.value)
     onPriceChange?.(formatted)
-    onChange?.(formatted, currency) // Para compatibilidad
   }
 
   const handleCurrencyChange = (newCurrency: string) => {
-    const newCurrencyTyped = newCurrency as 'ARS' | 'USD'
-    onCurrencyChange?.(newCurrencyTyped)
-    onChange?.(formatPrice(value), newCurrencyTyped) // Para compatibilidad
+    onCurrencyChange?.(newCurrency as 'ARS' | 'USD')
   }
 
   const currencySymbol = currency === 'USD' ? 'U$S' : '$'

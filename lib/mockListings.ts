@@ -20,9 +20,6 @@ export interface Listing {
   whatsapp?: string
   phone?: string
   featured?: boolean // Para destacados en home
-  views?: number // Número de visualizaciones
-  active?: boolean // Si la publicación está activa
-  currency?: string // Moneda (ARS/USD)
 }
 
 // Generamos publicaciones mock variadas

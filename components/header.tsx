@@ -33,11 +33,18 @@ export function Header() {
             Mercado
           </Link>
           <Link
+            href="/propiedades"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Propiedades
+          </Link>
+          {/* Gastronomía - Oculto para segunda etapa */}
+          {/* <Link
             href="/comer"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Gastronomía
-          </Link>
+          </Link> */}
           <Link
             href="/publicar"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -75,11 +82,18 @@ export function Header() {
                   Mercado
                 </Link>
                 <Link
+                  href="/propiedades"
+                  className="text-base font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Propiedades
+                </Link>
+                {/* Gastronomía - Oculto para segunda etapa */}
+                {/* <Link
                   href="/comer"
                   className="text-base font-medium text-foreground hover:text-primary transition-colors"
                 >
                   Gastronomía
-                </Link>
+                </Link> */}
                 <Link
                   href="/publicar"
                   className="text-base font-medium text-foreground hover:text-primary transition-colors"

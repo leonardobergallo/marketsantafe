@@ -44,7 +44,7 @@ export function BusinessSection() {
                 size="lg"
                 className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all"
               >
-                <a href="/negocios">Ver planes</a>
+                <a href="/planes">Ver planes</a>
               </Button>
             </div>
 

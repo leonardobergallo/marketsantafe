@@ -9,7 +9,6 @@ export interface ListingFilters {
   min?: number
   max?: number
   condition?: 'nuevo' | 'usado' | 'reacondicionado'
-  excludeCategories?: string[] // IDs de categorías a excluir
 }
 
 export async function getListings(filters: ListingFilters = {}): Promise<Listing[]> {
@@ -98,18 +97,6 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
       params.push(filters.condition)
     }
 
-    // Excluir categorías específicas (ej: excluir inmobiliaria del mercado)
-    if (filters.excludeCategories && filters.excludeCategories.length > 0) {
-      const excludeIds = filters.excludeCategories.map(id => parseInt(id)).filter(id => !isNaN(id))
-      if (excludeIds.length > 0) {
-        // Construir NOT IN con múltiples parámetros
-        const placeholders = excludeIds.map((_, idx) => `$${paramCount + idx + 1}`).join(', ')
-        query += ` AND c.id NOT IN (${placeholders})`
-        params.push(...excludeIds)
-        paramCount += excludeIds.length
-      }
-    }
-
     // Ordenar por featured primero, luego por fecha
     query += ` ORDER BY l.featured DESC, l.created_at DESC`
 
@@ -156,7 +143,7 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
   }
 }
 
-export async function getListingById(id: string, userId?: number): Promise<(Listing & { userId?: number; currency?: string; email?: string; instagram?: string }) | null> {
+export async function getListingById(id: string): Promise<Listing | null> {
   try {
     const listingId = parseInt(id)
 
@@ -170,7 +157,6 @@ export async function getListingById(id: string, userId?: number): Promise<(List
         l.title,
         l.description,
         l.price,
-        l.currency,
         l.condition,
         l.image_url,
         l.images,
@@ -178,19 +164,14 @@ export async function getListingById(id: string, userId?: number): Promise<(List
         l.active,
         l.views,
         l.created_at,
-        l.user_id,
-        l.whatsapp,
-        l.phone,
-        l.email,
-        l.instagram,
         c.id as category_id,
         c.name as category_name,
         c.slug as category_slug,
         z.id as zone_id,
         z.name as zone_name,
         z.slug as zone_slug,
-        u.whatsapp as user_whatsapp,
-        u.phone as user_phone,
+        u.whatsapp,
+        u.phone,
         u.name as user_name,
         u.is_business,
         u.business_name

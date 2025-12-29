@@ -18,7 +18,7 @@ import { categories } from '@/lib/categories'
 import { zones } from '@/lib/zones'
 import { type Condition } from '@/lib/mockListings'
 import { toast } from 'sonner'
-import { ArrowLeft, ShoppingBag, UtensilsCrossed, Loader2, Upload } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, UtensilsCrossed, Loader2, Home, FileSpreadsheet, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -147,11 +147,11 @@ export default function PublicarPage() {
         if (response.ok) {
           setIsAuthenticated(true)
         } else {
-          // Redirigir a login con returnUrl
+          // Redirigir a login con returnUrl (401 es esperado si no está autenticado)
           router.push(`/login?returnUrl=${encodeURIComponent('/publicar')}`)
         }
       } catch (error) {
-        console.error('Error verificando autenticación:', error)
+        // Silenciar errores de red, solo redirigir
         router.push(`/login?returnUrl=${encodeURIComponent('/publicar')}`)
       } finally {
         setIsCheckingAuth(false)
@@ -191,7 +191,18 @@ export default function PublicarPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error || 'Error al crear la publicación')
+        if (response.status === 403 && result.message) {
+          // Límite alcanzado
+          toast.error(result.message, {
+            duration: 5000,
+            action: {
+              label: 'Ver planes',
+              onClick: () => router.push('/planes'),
+            },
+          })
+        } else {
+          toast.error(result.error || 'Error al crear la publicación')
+        }
         setIsSubmitting(false)
         return
       }
@@ -240,12 +251,7 @@ export default function PublicarPage() {
       }
 
       toast.success('¡Restaurante creado exitosamente!')
-      // Redirigir a gestionar el menú del restaurante
-      if (result.restaurant?.id) {
-        router.push(`/restaurantes/${result.restaurant.id}/menu`)
-      } else {
-        router.push('/comer')
-      }
+      router.push('/comer')
     } catch (error) {
       console.error('Error al publicar:', error)
       toast.error('Error al crear el restaurante')
@@ -289,14 +295,6 @@ export default function PublicarPage() {
           <p className="text-muted-foreground">
             Publicá fácil, vendé directo
           </p>
-          <div className="mt-4">
-            <Link href="/publicar/masivo">
-              <Button variant="outline" className="w-full sm:w-auto">
-                <Upload className="h-4 w-4 mr-2" />
-                Carga Masiva (múltiples productos)
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Selector de vertical - Paso 1 */}
@@ -318,7 +316,23 @@ export default function PublicarPage() {
                   Productos, servicios, alquileres
                 </p>
               </button>
-              <button
+              <Link
+                href="/inmobiliaria-en-equipo/publicar"
+                className="p-6 border-2 border-border rounded-lg hover:border-primary transition-colors text-left group"
+              >
+                <Home className="h-8 w-8 text-primary mb-3" />
+                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                  Propiedades
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Alquiler, venta, alquiler temporal
+                </p>
+                <p className="text-xs text-primary mt-2 font-medium">
+                  Con opción de servicio profesional
+                </p>
+              </Link>
+              {/* Gastronomía - Oculto para segunda etapa */}
+              {/* <button
                 onClick={() => setVertical('gastronomia')}
                 className="p-6 border-2 border-border rounded-lg hover:border-primary transition-colors text-left group"
               >
@@ -329,25 +343,52 @@ export default function PublicarPage() {
                 <p className="text-sm text-muted-foreground">
                   Restaurantes, locales, delivery
                 </p>
-              </button>
+              </button> */}
             </div>
           </Card>
         )}
 
         {/* Formulario MERCADO */}
         {vertical === 'mercado' && (
-          <form onSubmit={mercadoForm.handleSubmit(onMercadoSubmit)} className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Publicar en Mercado</h2>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setVertical(null)}
-              >
-                Cambiar
-              </Button>
-            </div>
+          <>
+            {/* Opción de importar desde Excel */}
+            <Card className="p-6 mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <FileSpreadsheet className="h-5 w-5 text-primary" />
+                    ¿Tenés muchos productos para publicar?
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Importá múltiples productos desde un archivo Excel de una vez. Ideal para negocios con muchos productos.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    asChild
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Link href="/publicar/masivo">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Importar desde Excel
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            <form onSubmit={mercadoForm.handleSubmit(onMercadoSubmit)} className="space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-foreground">Publicar producto individual</h2>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setVertical(null)}
+                >
+                  Cambiar
+                </Button>
+              </div>
 
             {/* Título */}
             <div className="space-y-2">
@@ -380,11 +421,13 @@ export default function PublicarPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
+                    {categories
+                      .filter(cat => cat.slug !== 'alquileres' && cat.slug !== 'inmuebles')
+                      .map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 {mercadoForm.formState.errors.categoryId && (
@@ -573,7 +616,7 @@ export default function PublicarPage() {
             <div className="space-y-2">
               <Label>Fotos</Label>
               <ImageUpload
-                maxImages={10}
+                maxImages={3}
                 value={mercadoForm.watch('images') || []}
                 onChange={(images) => mercadoForm.setValue('images', images)}
                 disabled={isSubmitting}
@@ -601,10 +644,11 @@ export default function PublicarPage() {
               </Button>
             </div>
           </form>
+          </>
         )}
 
-        {/* Formulario GASTRONOMÍA */}
-        {vertical === 'gastronomia' && (
+        {/* Formulario GASTRONOMÍA - Oculto para segunda etapa */}
+        {false && vertical === 'gastronomia' && (
           <form onSubmit={gastronomiaForm.handleSubmit(onGastronomiaSubmit)} className="space-y-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-foreground">Publicar en Gastronomía</h2>
@@ -824,7 +868,7 @@ export default function PublicarPage() {
               <ImageUpload
                 value={gastronomiaForm.watch('images') || []}
                 onChange={(images) => gastronomiaForm.setValue('images', images)}
-                maxImages={10}
+                maxImages={3}
                 disabled={isSubmitting}
               />
             </div>
