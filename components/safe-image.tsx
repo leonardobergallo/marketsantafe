@@ -28,9 +28,11 @@ export function SafeImage({
     // Normalizar la URL para servir desde public/
     let normalized = url
     
-    // Si la URL tiene /uploads/images/, cambiarla a /uploads/
+    // Convertir todas las rutas a /images/ para consistencia
     if (normalized.startsWith('/uploads/images/')) {
-      normalized = normalized.replace('/uploads/images/', '/uploads/')
+      normalized = normalized.replace('/uploads/images/', '/images/')
+    } else if (normalized.startsWith('/uploads/')) {
+      normalized = normalized.replace('/uploads/', '/images/')
     }
     
     // Asegurar que empiece con /
@@ -38,18 +40,8 @@ export function SafeImage({
       normalized = `/${normalized}`
     }
     
-    // Si la URL tiene caracteres especiales que podrían causar problemas,
-    // usar la API route para servir la imagen
+    // Servir directamente como archivo estático
     // Next.js servirá archivos estáticos desde public/ automáticamente
-    // pero para caracteres especiales, usar la API route
-    const hasSpecialChars = /[()\[\]{}%#&?]/.test(normalized)
-    
-    if (hasSpecialChars && normalized.startsWith('/uploads/')) {
-      // Usar API route para imágenes con caracteres especiales
-      const imagePath = normalized.replace('/uploads/', '')
-      return `/api/images/${encodeURIComponent(imagePath)}`
-    }
-    
     return normalized
   }, [src, fallback])
 
