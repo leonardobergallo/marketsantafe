@@ -56,7 +56,7 @@ export function ListingCard({ listing }: ListingCardProps) {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                     {idx === 0 && listing.images && listing.images.length > 3 && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                         <span className="text-white text-sm font-bold">+{listing.images.length - 3}</span>
                       </div>
                     )}

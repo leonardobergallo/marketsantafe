@@ -1,7 +1,7 @@
 // Componente de imagen segura con fallback
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 interface SafeImageProps {
   src: string
@@ -16,8 +16,10 @@ export function SafeImage({
   className = '', 
   fallback = '/placeholder.jpg'
 }: SafeImageProps) {
-  // Limpiar y normalizar la ruta de la imagen
-  const normalizeSrc = (url: string) => {
+  // Memoizar la normalización para evitar recálculos innecesarios
+  const normalizedSrc = useMemo(() => {
+    const url = src || fallback
+    
     if (!url) return fallback
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url
@@ -43,39 +45,45 @@ export function SafeImage({
     
     // Para otras rutas, usar tal cual
     return url.startsWith('/') ? url : `/${url}`
-  }
+  }, [src, fallback])
 
-  // Siempre normalizar el src - no usar estado para la normalización
-  const normalizedSrc = normalizeSrc(src || fallback)
   const [hasError, setHasError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Resetear estados cuando cambia el src
+  useEffect(() => {
+    setHasError(false)
+    setIsLoading(true)
+  }, [src])
 
   const finalSrc = hasError ? fallback : normalizedSrc
 
-  // Resetear error si cambia el src
-  useEffect(() => {
-    setHasError(false)
-  }, [src])
-
   return (
-    <img
-      src={finalSrc}
-      alt={alt}
-      className={className}
-      onError={(e) => {
-        if (!hasError && finalSrc !== fallback) {
-          console.warn('Error cargando imagen:', finalSrc, '→ Intentando fallback')
-          setHasError(true)
-        }
-      }}
-      onLoad={() => {
-        // Imagen cargada correctamente
-        if (hasError) {
-          setHasError(false)
-        }
-      }}
-      loading="lazy"
-      decoding="async"
-    />
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 bg-muted animate-pulse" />
+      )}
+      <img
+        src={finalSrc}
+        alt={alt}
+        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+        onError={(e) => {
+          if (!hasError && finalSrc !== fallback) {
+            console.warn('Error cargando imagen:', finalSrc, '→ Intentando fallback')
+            setHasError(true)
+            setIsLoading(false)
+          }
+        }}
+        onLoad={() => {
+          setIsLoading(false)
+          if (hasError) {
+            setHasError(false)
+          }
+        }}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
   )
 }
 
