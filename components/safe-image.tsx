@@ -25,17 +25,32 @@ export function SafeImage({
       return url
     }
     
-    // En producción, servir imágenes directamente como archivos estáticos
-    // Solo usar API route si es necesario para caracteres especiales
     // Normalizar la URL para servir desde public/
-    if (url.startsWith('/images/') || url.startsWith('/uploads/images/') || url.startsWith('/uploads/')) {
-      // Si la URL ya tiene el formato correcto, usarla directamente
-      // Next.js servirá archivos estáticos desde public/ automáticamente
-      return url.startsWith('/') ? url : `/${url}`
+    let normalized = url
+    
+    // Si la URL tiene /uploads/images/, cambiarla a /uploads/
+    if (normalized.startsWith('/uploads/images/')) {
+      normalized = normalized.replace('/uploads/images/', '/uploads/')
     }
     
-    // Para otras rutas, usar tal cual
-    return url.startsWith('/') ? url : `/${url}`
+    // Asegurar que empiece con /
+    if (!normalized.startsWith('/')) {
+      normalized = `/${normalized}`
+    }
+    
+    // Si la URL tiene caracteres especiales que podrían causar problemas,
+    // usar la API route para servir la imagen
+    // Next.js servirá archivos estáticos desde public/ automáticamente
+    // pero para caracteres especiales, usar la API route
+    const hasSpecialChars = /[()\[\]{}%#&?]/.test(normalized)
+    
+    if (hasSpecialChars && normalized.startsWith('/uploads/')) {
+      // Usar API route para imágenes con caracteres especiales
+      const imagePath = normalized.replace('/uploads/', '')
+      return `/api/images/${encodeURIComponent(imagePath)}`
+    }
+    
+    return normalized
   }, [src, fallback])
 
   const [hasError, setHasError] = useState(false)
