@@ -1,7 +1,7 @@
 // API route para servir imágenes con caracteres especiales
 import { NextRequest, NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
-import { join } from 'path'
+import { join, normalize } from 'path'
 import { existsSync } from 'fs'
 
 export async function GET(
@@ -10,22 +10,50 @@ export async function GET(
 ) {
   try {
     const { path: pathArray } = await params
-    // Decodificar la ruta para manejar caracteres especiales codificados
-    let imagePath = pathArray.map(p => decodeURIComponent(p)).join('/')
     
-    // Construir la ruta completa del archivo
-    // Buscar primero en uploads/images, luego en images
-    let filePath = join(process.cwd(), 'public', 'uploads', 'images', imagePath)
+    // Decodificar y limpiar la ruta para manejar caracteres especiales
+    let imagePath = pathArray
+      .map(p => decodeURIComponent(p))
+      .join('/')
+      .replace(/^\/+|\/+$/g, '') // Remover slashes al inicio y final
     
-    if (!existsSync(filePath)) {
-      // Intentar en public/images como fallback
-      filePath = join(process.cwd(), 'public', 'images', imagePath)
+    // Limpiar la ruta de posibles intentos de path traversal
+    imagePath = normalize(imagePath).replace(/^(\.\.(\/|\\|$))+/, '')
+    
+    if (!imagePath) {
+      console.error('Empty image path')
+      return new NextResponse('Invalid image path', { status: 400 })
     }
     
-    // Verificar que el archivo existe y está dentro de public
+    // Construir rutas posibles (en orden de prioridad)
     const publicPath = join(process.cwd(), 'public')
-    if (!existsSync(filePath) || !filePath.startsWith(publicPath)) {
-      console.error('Image not found:', imagePath)
+    const possiblePaths = [
+      join(publicPath, 'uploads', 'images', imagePath),
+      join(publicPath, 'uploads', imagePath),
+      join(publicPath, 'images', imagePath),
+      join(publicPath, imagePath),
+    ]
+    
+    let filePath: string | null = null
+    
+    // Buscar el archivo en las rutas posibles
+    for (const path of possiblePaths) {
+      const normalizedPath = normalize(path)
+      // Verificar que está dentro de public y existe
+      if (normalizedPath.startsWith(publicPath) && existsSync(normalizedPath)) {
+        filePath = normalizedPath
+        break
+      }
+    }
+    
+    if (!filePath) {
+      // Log detallado para debug en producción
+      console.error('Image not found:', {
+        imagePath,
+        searchedPaths: possiblePaths,
+        cwd: process.cwd(),
+        publicPath,
+      })
       return new NextResponse('Image not found', { status: 404 })
     }
     
@@ -40,17 +68,22 @@ export async function GET(
       'jpeg': 'image/jpeg',
       'gif': 'image/gif',
       'webp': 'image/webp',
+      'svg': 'image/svg+xml',
     }[ext || ''] || 'image/png'
     
-    // Devolver la imagen
+    // Devolver la imagen con headers optimizados
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
       },
     })
-  } catch (error) {
-    console.error('Error serving image:', error)
+  } catch (error: any) {
+    console.error('Error serving image:', {
+      error: error.message,
+      stack: error.stack,
+    })
     return new NextResponse('Error serving image', { status: 500 })
   }
 }
