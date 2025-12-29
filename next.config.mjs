@@ -17,6 +17,7 @@ const nextConfig = {
     '*': [
       'public/uploads/**/*',
       'public/uploads/images/**/*',
+      'public/images/**/*',
     ],
   },
   // Asegurar que los archivos estáticos se sirvan correctamente

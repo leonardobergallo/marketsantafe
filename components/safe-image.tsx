@@ -28,11 +28,11 @@ export function SafeImage({
     // Normalizar la URL para servir desde public/
     let normalized = url
     
-    // Convertir todas las rutas a /images/ para consistencia
-    if (normalized.startsWith('/uploads/images/')) {
-      normalized = normalized.replace('/uploads/images/', '/images/')
-    } else if (normalized.startsWith('/uploads/')) {
-      normalized = normalized.replace('/uploads/', '/images/')
+    // Mantener las rutas como están (uploads/images/ o images/)
+    // En producción, Next.js servirá archivos estáticos desde public/ automáticamente
+    if (normalized.startsWith('/images/') && !normalized.startsWith('/uploads/')) {
+      // Si está en /images/ pero debería estar en /uploads/images/, no cambiar
+      // Solo asegurar que tenga el formato correcto
     }
     
     // Asegurar que empiece con /
@@ -52,31 +52,29 @@ export function SafeImage({
   useEffect(() => {
     setHasError(false)
     setIsLoading(true)
-  }, [src])
+  }, [normalizedSrc])
 
   const finalSrc = hasError ? fallback : normalizedSrc
 
   return (
     <div className="relative w-full h-full">
       {isLoading && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+        <div className="absolute inset-0 bg-muted animate-pulse z-0" />
       )}
       <img
         src={finalSrc}
         alt={alt}
-        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200 relative z-10`}
         onError={(e) => {
           if (!hasError && finalSrc !== fallback) {
-            console.warn('Error cargando imagen:', finalSrc, '→ Intentando fallback')
             setHasError(true)
+            setIsLoading(false)
+          } else {
             setIsLoading(false)
           }
         }}
         onLoad={() => {
           setIsLoading(false)
-          if (hasError) {
-            setHasError(false)
-          }
         }}
         loading="lazy"
         decoding="async"
