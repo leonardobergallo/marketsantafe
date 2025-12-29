@@ -24,6 +24,9 @@ interface LocationPickerProps {
 
 // Componente interno para manejar clicks en el mapa
 function MapClickHandler({ onMapClick, disabled }: { onMapClick: (lat: number, lng: number) => void; disabled: boolean }) {
+  // Importar dinámicamente para evitar problemas en el build
+  if (typeof window === 'undefined') return null
+  
   const { useMapEvents } = require('react-leaflet')
   useMapEvents({
     click: (e: any) => {
