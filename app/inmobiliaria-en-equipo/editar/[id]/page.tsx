@@ -793,8 +793,6 @@ export default function EditarPropiedadPage() {
               </Button>
             </div>
           </form>
-            </div>
-          )}
         </Card>
       </main>
       <Footer />
