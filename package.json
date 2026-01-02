@@ -24,7 +24,11 @@
     "db:clear-properties": "tsx scripts/clear-properties.ts",
     "db:add-admin-field": "tsx scripts/add-admin-field.ts",
     "db:create-admin": "tsx scripts/create-admin-user.ts",
-    "db:optimize-properties": "tsx scripts/add-properties-indexes.ts"
+    "db:optimize-properties": "tsx scripts/add-properties-indexes.ts",
+    "db:list-keep-users": "tsx scripts/list-keep-users.ts",
+    "db:delete-other-users": "tsx scripts/delete-other-users.ts",
+    "db:add-missing-zones": "tsx scripts/add-missing-zones.ts",
+    "db:assign-premium-plan": "tsx scripts/assign-premium-plan-to-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

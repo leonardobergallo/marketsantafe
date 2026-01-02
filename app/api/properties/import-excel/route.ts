@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Buscar zona (puede ser ID, nombre o slug)
+        // Si no existe, crearla automáticamente
         let zoneId: number | null = null
         if (row.zona) {
           const zoneQuery = /^\d+$/.test(String(row.zona))
@@ -165,6 +166,21 @@ export async function POST(request: NextRequest) {
           const zoneResult = await pool.query(zoneQuery, [row.zona])
           if (zoneResult.rows.length > 0) {
             zoneId = zoneResult.rows[0].id
+          } else {
+            // Si no existe, crear la zona automáticamente
+            const zoneName = String(row.zona).trim()
+            const zoneSlug = zoneName
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+            
+            const newZoneResult = await pool.query(
+              'INSERT INTO zones (name, slug) VALUES ($1, $2) ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id',
+              [zoneName, zoneSlug]
+            )
+            zoneId = newZoneResult.rows[0].id
           }
         }
 
@@ -220,6 +236,9 @@ export async function POST(request: NextRequest) {
           : false
 
         // Verificar límite de propiedades (una por una)
+        // NOTA: Para importación masiva, omitimos la verificación de límites
+        // Si se necesita, se puede habilitar descomentando el código siguiente:
+        /*
         const limitCheck = await checkCanPublish(user.id, 'property')
         if (!limitCheck.allowed) {
           throw new Error(
@@ -228,6 +247,7 @@ export async function POST(request: NextRequest) {
               : 'No podés publicar. Verificá tu suscripción.'
           )
         }
+        */
 
         // Insertar propiedad
         const result = await pool.query(

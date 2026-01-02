@@ -25,6 +25,7 @@ import { PhoneInput } from '@/components/ui/phone-input'
 import { PriceInputWithCurrency } from '@/components/ui/price-input-with-currency'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { LocationPicker } from '@/components/location-picker'
+import { UpgradePlanDialog } from '@/components/upgrade-plan-dialog'
 
 const propertySchema = z.object({
   type: z.enum(['alquiler', 'venta', 'alquiler-temporal'], {
@@ -78,6 +79,8 @@ export default function PublicarPropiedadPage() {
   const [selectedLatitude, setSelectedLatitude] = useState<number | null>(null)
   const [selectedLongitude, setSelectedLongitude] = useState<number | null>(null)
   const [selectedAddress, setSelectedAddress] = useState<string>('')
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [limitInfo, setLimitInfo] = useState<{ current: number; limit: number } | null>(null)
 
   const {
     register,
@@ -158,14 +161,19 @@ export default function PublicarPropiedadPage() {
 
       if (!response.ok) {
         if (response.status === 403 && result.message) {
-          // Límite alcanzado
-          toast.error(result.message, {
-            duration: 5000,
-            action: {
-              label: 'Ver planes',
-              onClick: () => router.push('/planes'),
-            },
-          })
+          // Límite alcanzado - mostrar diálogo de planes
+          if (result.current !== undefined && result.limit !== undefined) {
+            setLimitInfo({ current: result.current, limit: result.limit })
+            setShowUpgradeDialog(true)
+          } else {
+            toast.error(result.message, {
+              duration: 5000,
+              action: {
+                label: 'Ver planes',
+                onClick: () => router.push('/planes'),
+              },
+            })
+          }
         } else {
           toast.error(result.error || 'Error al publicar la propiedad')
         }
@@ -888,6 +896,12 @@ export default function PublicarPropiedadPage() {
         </Card>
       </main>
       <Footer />
+      <UpgradePlanDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        currentLimit={limitInfo?.current || 0}
+        limitType="property"
+      />
     </div>
   )
 }

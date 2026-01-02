@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
 import { emailSchema } from '@/lib/validations'
 
 // Schema de validación
@@ -28,6 +29,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPasswordHelp, setShowPasswordHelp] = useState(false)
 
   const {
     register,
@@ -52,10 +54,23 @@ export default function LoginPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error || 'Error al iniciar sesión')
+        // Si es un error de autenticación (401), mostrar mensaje sobre contactar al administrador
+        if (response.status === 401) {
+          setShowPasswordHelp(true)
+          toast.error(result.error || 'Email o contraseña incorrectos', {
+            description: 'Si necesitás recuperar o cambiar tu contraseña, contactá con el administrador.',
+            duration: 6000,
+          })
+        } else {
+          setShowPasswordHelp(false)
+          toast.error(result.error || 'Error al iniciar sesión')
+        }
         setIsSubmitting(false)
         return
       }
+
+      // Si el login es exitoso, ocultar el mensaje de ayuda
+      setShowPasswordHelp(false)
 
       toast.success('¡Bienvenido!')
       
@@ -127,6 +142,16 @@ export default function LoginPage() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
+
+            {/* Mensaje de ayuda para recuperar contraseña */}
+            {showPasswordHelp && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Si necesitás recuperar o cambiar tu contraseña, contactá con el administrador.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Botón submit */}
             <Button
