@@ -28,7 +28,13 @@
     "db:list-keep-users": "tsx scripts/list-keep-users.ts",
     "db:delete-other-users": "tsx scripts/delete-other-users.ts",
     "db:add-missing-zones": "tsx scripts/add-missing-zones.ts",
-    "db:assign-premium-plan": "tsx scripts/assign-premium-plan-to-user.ts"
+    "db:assign-premium-plan": "tsx scripts/assign-premium-plan-to-user.ts",
+    "db:delete-example-products": "tsx scripts/delete-example-products.ts",
+    "db:import-50-products-leonardo": "tsx scripts/import-50-products-leonardo.ts",
+    "db:import-productos-sin-fotos-leonardo": "tsx scripts/import-productos-sin-fotos-leonardo.ts",
+    "db:fix-prices-divide-1530": "tsx scripts/fix-prices-divide-1530.ts",
+    "db:fix-condition-productos-sin-fotos": "tsx scripts/fix-condition-productos-sin-fotos.ts",
+    "db:fix-productos-sin-fotos": "tsx scripts/fix-productos-sin-fotos-prices-condition.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -11,15 +11,14 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   // Configuración de Turbopack (vacía para silenciar el warning)
   turbopack: {},
-  // Excluir imágenes del bundle de funciones serverless
-  // Esto evita que Vercel incluya las imágenes en el bundle de la función
-  outputFileTracingExcludes: {
-    '*': [
-      'public/uploads/**/*',
-      'public/uploads/images/**/*',
-      'public/images/**/*',
-    ],
-  },
+  // NO excluir imágenes - necesitamos que estén disponibles en producción
+  // outputFileTracingExcludes: {
+  //   '*': [
+  //     'public/uploads/**/*',
+  //     'public/uploads/images/**/*',
+  //     'public/images/**/*',
+  //   ],
+  // },
   // Asegurar que los archivos estáticos se sirvan correctamente
   async headers() {
     return [
