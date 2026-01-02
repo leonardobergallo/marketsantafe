@@ -29,6 +29,9 @@ function getPool(): Pool {
       ssl: {
         rejectUnauthorized: false, // Necesario para Neon
       },
+      max: 20, // Máximo de conexiones en el pool
+      idleTimeoutMillis: 30000, // Cerrar conexiones inactivas después de 30 segundos
+      connectionTimeoutMillis: 10000, // Timeout de conexión de 10 segundos
     })
   }
   return poolInstance

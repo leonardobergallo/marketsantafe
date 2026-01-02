@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Home, Plus, Edit, Eye, Loader2, MapPin, DollarSign, MessageCircle, CheckCircle2, Sparkles } from 'lucide-react'
+import { Home, Plus, Edit, Eye, Loader2, MapPin, DollarSign, MessageCircle, CheckCircle2, Sparkles, Trash2, Building2, ExternalLink, Copy, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { generateSlug } from '@/lib/utils'
 
 interface Property {
   id: number
@@ -40,6 +42,8 @@ export default function MisPropiedadesPage() {
   const [loading, setLoading] = useState(true)
   const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null)
   const [showServiceDialog, setShowServiceDialog] = useState(false)
+  const [deletingPropertyId, setDeletingPropertyId] = useState<number | null>(null)
+  const [user, setUser] = useState<{ business_name: string | null } | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,6 +54,8 @@ export default function MisPropiedadesPage() {
           return
         }
 
+        const userData = await response.json()
+        setUser(userData.user)
         setIsAuthenticated(true)
         fetchProperties()
       } catch (error) {
@@ -124,6 +130,29 @@ export default function MisPropiedadesPage() {
     setShowServiceDialog(true)
   }
 
+  const handleDeleteProperty = async (propertyId: number) => {
+    try {
+      setDeletingPropertyId(propertyId)
+      const response = await fetch(`/api/properties/${propertyId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        toast.error(error.error || 'Error al eliminar la propiedad')
+        return
+      }
+
+      toast.success('Propiedad eliminada exitosamente')
+      fetchProperties()
+    } catch (error) {
+      console.error('Error eliminando propiedad:', error)
+      toast.error('Error al eliminar la propiedad')
+    } finally {
+      setDeletingPropertyId(null)
+    }
+  }
+
   // Mostrar loading mientras se verifica autenticación
   if (isCheckingAuth || loading) {
     return (
@@ -175,6 +204,26 @@ export default function MisPropiedadesPage() {
     return currency === 'USD' ? `U$S ${formatted}` : `$${formatted}`
   }
 
+  const getPublicLink = () => {
+    if (!user?.business_name) return ''
+    const slug = generateSlug(user.business_name)
+    return `${typeof window !== 'undefined' ? window.location.origin : ''}/inmobiliaria/${slug}`
+  }
+
+  const handleCopyLink = async () => {
+    const link = getPublicLink()
+    if (!link) {
+      toast.error('No se pudo generar el link público')
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(link)
+      toast.success('Link copiado al portapapeles')
+    } catch (error) {
+      toast.error('Error al copiar el link')
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -194,13 +243,67 @@ export default function MisPropiedadesPage() {
               </p>
             </div>
           </div>
-          <Button asChild>
-            <Link href="/inmobiliaria-en-equipo/publicar">
-              <Plus className="mr-2 h-4 w-4" />
-              Publicar propiedad gratis
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href="/inmobiliaria-en-equipo/publicar">
+                <Plus className="mr-2 h-4 w-4" />
+                Publicar propiedad gratis
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/publicar/masivo?contentType=propiedades">
+                <Upload className="mr-2 h-4 w-4" />
+                Carga Masiva
+              </Link>
+            </Button>
+          </div>
         </div>
+
+        {/* Info de Inmobiliaria y Link Público */}
+        {user?.business_name && (
+          <Card className="p-6 mb-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-foreground mb-1">
+                    {user.business_name}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Link público de tu inmobiliaria
+                  </p>
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+                    <code className="text-sm flex-1 break-all font-mono">
+                      {getPublicLink()}
+                    </code>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 w-full md:w-auto">
+                <Button
+                  onClick={handleCopyLink}
+                  variant="outline"
+                  className="w-full md:w-auto"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copiar Link
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full md:w-auto"
+                >
+                  <Link href={getPublicLink()} target="_blank">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Ver página pública
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Propiedades */}
         {properties.length === 0 ? (
@@ -352,19 +455,60 @@ export default function MisPropiedadesPage() {
                         </DialogContent>
                       </Dialog>
                     )}
-                    <div className="flex gap-2">
-                      <Button asChild variant="outline" size="sm" className="flex-1">
-                        <Link href={`/inmobiliaria-en-equipo/editar/${property.id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm" className="flex-1">
-                        <Link href={`/propiedad/${property.id}`}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver
-                        </Link>
-                      </Button>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <Button asChild variant="outline" size="sm" className="flex-1">
+                          <Link href={`/inmobiliaria-en-equipo/editar/${property.id}`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm" className="flex-1">
+                          <Link href={`/propiedad/${property.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver
+                          </Link>
+                        </Button>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                            disabled={deletingPropertyId === property.id}
+                          >
+                            {deletingPropertyId === property.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Eliminando...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </>
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar propiedad?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción no se puede deshacer. Se eliminará permanentemente la propiedad "{property.title}".
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteProperty(property.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </div>

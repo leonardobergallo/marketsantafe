@@ -80,6 +80,17 @@ export async function POST(request: NextRequest) {
 
     const user = result.rows[0]
 
+    // Generar slug si es inmobiliaria
+    let slug = null
+    if (is_business && business_name) {
+      slug = business_name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    }
+
     return NextResponse.json(
       {
         message: 'Usuario registrado exitosamente',
@@ -94,6 +105,7 @@ export async function POST(request: NextRequest) {
           avatar_url: user.avatar_url,
           verified: user.verified,
         },
+        slug, // Incluir slug si es inmobiliaria
       },
       { status: 201 }
     )

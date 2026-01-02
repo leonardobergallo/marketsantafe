@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Home, MapPin, DollarSign, Eye, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { PropertiesFilters } from '@/components/properties-filters'
+import { PropertiesMap } from '@/components/properties-map'
 
 interface Property {
   id: string
@@ -22,6 +24,8 @@ interface Property {
   bathrooms?: number
   area_m2?: number
   address?: string
+  latitude?: number | null
+  longitude?: number | null
   image_url?: string
   images?: string[]
   professional_service: boolean
@@ -72,6 +76,9 @@ export default function PropiedadesPage() {
         const min = searchParams.get('min')
         const max = searchParams.get('max')
         const rooms = searchParams.get('rooms')
+        const bathrooms = searchParams.get('bathrooms')
+        const min_area = searchParams.get('min_area')
+        const max_area = searchParams.get('max_area')
 
         if (q) params.append('q', q)
         if (type) params.append('type', type)
@@ -79,6 +86,9 @@ export default function PropiedadesPage() {
         if (min) params.append('min', min)
         if (max) params.append('max', max)
         if (rooms) params.append('rooms', rooms)
+        if (bathrooms) params.append('bathrooms', bathrooms)
+        if (min_area) params.append('min_area', min_area)
+        if (max_area) params.append('max_area', max_area)
 
         const response = await fetch(`/api/properties?${params.toString()}`)
         if (response.ok) {
@@ -144,18 +154,38 @@ export default function PropiedadesPage() {
                 <p className="text-muted-foreground">
                   Encontrá tu próximo hogar o inversión
                 </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Trabajamos con inmobiliarias locales. Te conectamos con la más adecuada para tu búsqueda.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Resultados */}
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground">
-              {isLoading ? 'Cargando...' : `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`}
-            </p>
-          </div>
+          {/* Layout: Filtros a la izquierda, Mapa y Propiedades a la derecha */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Columna izquierda: Filtros */}
+            <div className="lg:col-span-1">
+              <PropertiesFilters />
+            </div>
 
-          {/* Grid de propiedades */}
+            {/* Columna derecha: Mapa y Propiedades */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Mapa */}
+              {!isLoading && properties.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Ubicación de las propiedades</h2>
+                  <PropertiesMap properties={properties} />
+                </div>
+              )}
+
+              {/* Resultados */}
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {isLoading ? 'Cargando...' : `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`}
+                </p>
+              </div>
+
+              {/* Grid de propiedades */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -233,6 +263,8 @@ export default function PropiedadesPage() {
               </p>
             </Card>
           )}
+            </div>
+          </div>
         </div>
       </main>
       <Footer />

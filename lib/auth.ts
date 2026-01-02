@@ -15,6 +15,7 @@ export interface User {
   business_name: string | null
   avatar_url: string | null
   verified: boolean
+  is_admin?: boolean
   created_at: Date
   updated_at: Date
 }
@@ -43,7 +44,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     const user = await queryOne<User>(
-      `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, created_at, updated_at 
+      `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, is_admin, created_at, updated_at 
        FROM users 
        WHERE id = $1`,
       [parseInt(userId)]
@@ -91,7 +92,7 @@ export async function getUserByEmail(email: string): Promise<UserWithPassword | 
 // Obtener usuario por ID
 export async function getUserById(id: number): Promise<User | null> {
   return queryOne<User>(
-    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, created_at, updated_at 
+    `SELECT id, name, email, phone, whatsapp, is_business, business_name, avatar_url, verified, is_admin, created_at, updated_at 
      FROM users 
      WHERE id = $1`,
     [id]

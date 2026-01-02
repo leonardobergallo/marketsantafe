@@ -227,14 +227,14 @@ export default function CrearTiendaPage() {
             <div className="space-y-2">
               <Label htmlFor="zone">Zona</Label>
               <Select
-                value={watch('zone_id') || ''}
-                onValueChange={(value) => setValue('zone_id', value)}
+                value={watch('zone_id') || 'none'}
+                onValueChange={(value) => setValue('zone_id', value === 'none' ? '' : value)}
               >
                 <SelectTrigger id="zone">
                   <SelectValue placeholder="Selecciona una zona (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin zona específica</SelectItem>
+                  <SelectItem value="none">Sin zona específica</SelectItem>
                   {zones.filter(z => z.id !== '11').map((zone) => (
                     <SelectItem key={zone.id} value={zone.id}>
                       {zone.name}

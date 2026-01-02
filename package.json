@@ -18,7 +18,13 @@
     "db:migrate-currency": "tsx scripts/migrate-currency.ts",
     "db:migrate-listing-contact": "tsx scripts/migrate-listing-contact.ts",
     "db:seed-examples": "tsx scripts/seed-examples-with-images.ts",
-    "db:migrate-subscriptions": "tsx scripts/add-subscriptions-table.ts"
+    "db:migrate-subscriptions": "tsx scripts/add-subscriptions-table.ts",
+    "db:create-solar-user": "tsx scripts/create-solar-user.ts",
+    "db:create-solar-properties": "tsx scripts/create-solar-properties.ts",
+    "db:clear-properties": "tsx scripts/clear-properties.ts",
+    "db:add-admin-field": "tsx scripts/add-admin-field.ts",
+    "db:create-admin": "tsx scripts/create-admin-user.ts",
+    "db:optimize-properties": "tsx scripts/add-properties-indexes.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

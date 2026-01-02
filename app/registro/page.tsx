@@ -171,10 +171,17 @@ export default function RegistroPage() {
 
       toast.success('¡Registro exitoso! Redirigiendo...')
       
-      // Redirigir a login después de 1 segundo
-      setTimeout(() => {
-        router.push('/login')
-      }, 1000)
+      // Si es inmobiliaria, redirigir a su página de inmobiliaria
+      if (data.is_business && result.slug) {
+        setTimeout(() => {
+          router.push(`/inmobiliaria/${result.slug}`)
+        }, 1000)
+      } else {
+        // Redirigir a login después de 1 segundo
+        setTimeout(() => {
+          router.push('/login')
+        }, 1000)
+      }
     } catch (error) {
       console.error('Error en registro:', error)
       toast.error('Error al registrar usuario')

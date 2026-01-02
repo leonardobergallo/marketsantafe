@@ -141,6 +141,9 @@ export async function GET(request: NextRequest) {
     const min = searchParams.get('min') ? parseFloat(searchParams.get('min')!) : undefined
     const max = searchParams.get('max') ? parseFloat(searchParams.get('max')!) : undefined
     const rooms = searchParams.get('rooms') ? parseInt(searchParams.get('rooms')!) : undefined
+    const bathrooms = searchParams.get('bathrooms') ? parseInt(searchParams.get('bathrooms')!) : undefined
+    const minArea = searchParams.get('min_area') ? parseFloat(searchParams.get('min_area')!) : undefined
+    const maxArea = searchParams.get('max_area') ? parseFloat(searchParams.get('max_area')!) : undefined
 
     // Construir query
     let query = `
@@ -155,6 +158,8 @@ export async function GET(request: NextRequest) {
         p.bathrooms,
         p.area_m2,
         p.address,
+        p.latitude,
+        p.longitude,
         p.image_url,
         p.images,
         p.professional_service,
@@ -162,11 +167,15 @@ export async function GET(request: NextRequest) {
         p.active,
         p.views,
         p.created_at,
+        p.user_id,
         z.id as zone_id,
         z.name as zone_name,
-        z.slug as zone_slug
+        z.slug as zone_slug,
+        u.name as user_name,
+        u.business_name
       FROM properties p
       LEFT JOIN zones z ON p.zone_id = z.id
+      LEFT JOIN users u ON p.user_id = u.id
       WHERE p.active = true
     `
     
@@ -215,6 +224,27 @@ export async function GET(request: NextRequest) {
       params.push(rooms)
     }
 
+    // Filtro por baños
+    if (bathrooms !== undefined) {
+      paramCount++
+      query += ` AND p.bathrooms >= $${paramCount}`
+      params.push(bathrooms)
+    }
+
+    // Filtro por superficie mínima
+    if (minArea !== undefined) {
+      paramCount++
+      query += ` AND p.area_m2 >= $${paramCount}`
+      params.push(minArea)
+    }
+
+    // Filtro por superficie máxima
+    if (maxArea !== undefined) {
+      paramCount++
+      query += ` AND p.area_m2 <= $${paramCount}`
+      params.push(maxArea)
+    }
+
     // Ordenar por featured primero, luego por fecha
     query += ` ORDER BY p.featured DESC, p.professional_service DESC, p.created_at DESC`
 
@@ -246,6 +276,8 @@ export async function GET(request: NextRequest) {
         bathrooms: row.bathrooms,
         area_m2: row.area_m2 ? parseFloat(row.area_m2) : null,
         address: row.address,
+        latitude: row.latitude ? parseFloat(row.latitude) : null,
+        longitude: row.longitude ? parseFloat(row.longitude) : null,
         image_url: row.image_url,
         images: images.length > 0 ? images : undefined,
         professional_service: row.professional_service,
@@ -255,6 +287,8 @@ export async function GET(request: NextRequest) {
         zone_id: row.zone_id?.toString() || '',
         zone_name: row.zone_name,
         zone_slug: row.zone_slug,
+        user_id: row.user_id,
+        user_name: row.user_name || row.business_name,
       }
     })
 

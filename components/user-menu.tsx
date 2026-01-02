@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, User, Store, CreditCard } from 'lucide-react'
+import { LogOut, User, Store, CreditCard, Home, Package, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface User {
@@ -27,6 +27,7 @@ interface User {
   business_name: string | null
   avatar_url: string | null
   verified: boolean
+  is_admin?: boolean
 }
 
 export function UserMenu() {
@@ -148,6 +149,14 @@ export function UserMenu() {
             <span>Publicar</span>
           </Link>
         </DropdownMenuItem>
+        {/* Mis Productos (individuales, sin tienda) */}
+        <DropdownMenuItem asChild>
+          <Link href="/mis-productos" className="cursor-pointer">
+            <Package className="mr-2 h-4 w-4" />
+            <span>Mis Productos</span>
+          </Link>
+        </DropdownMenuItem>
+        {/* Mi Tienda (para productos con tienda) */}
         {user.is_business && (
           <DropdownMenuItem asChild>
             <Link href="/mi-tienda" className="cursor-pointer">
@@ -156,12 +165,30 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
         )}
+        {/* Mis Propiedades (para inmobiliarias) */}
+        <DropdownMenuItem asChild>
+          <Link href="/inmobiliaria-en-equipo/mis-propiedades" className="cursor-pointer">
+            <Home className="mr-2 h-4 w-4" />
+            <span>Mis Propiedades</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/mi-suscripcion" className="cursor-pointer">
             <CreditCard className="mr-2 h-4 w-4" />
             <span>Mi Suscripción</span>
           </Link>
         </DropdownMenuItem>
+        {user.is_admin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="cursor-pointer">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Panel de Administración</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

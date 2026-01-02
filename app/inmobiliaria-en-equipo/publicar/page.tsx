@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { zones } from '@/lib/zones'
 import { toast } from 'sonner'
-import { ArrowLeft, Home, Loader2, Sparkles, Info, DollarSign, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Home, Loader2, Sparkles, Info, DollarSign, MessageCircle, CheckCircle2, Upload, FileSpreadsheet, User, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -67,11 +67,14 @@ const propertySchema = z.object({
 
 type PropertyFormData = z.infer<typeof propertySchema>
 
+type PropertyPublisherType = 'particular' | 'inmobiliaria' | null
+
 export default function PublicarPropiedadPage() {
   const router = useRouter()
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [publisherType, setPublisherType] = useState<PropertyPublisherType>(null)
   const [selectedLatitude, setSelectedLatitude] = useState<number | null>(null)
   const [selectedLongitude, setSelectedLongitude] = useState<number | null>(null)
   const [selectedAddress, setSelectedAddress] = useState<string>('')
@@ -243,6 +246,32 @@ export default function PublicarPropiedadPage() {
           </Button>
         </div>
 
+        {/* Opción de carga masiva */}
+        <Card className="p-6 mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-primary" />
+                ¿Tenés muchas propiedades para publicar?
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Publicá múltiples propiedades a la vez usando nuestro formulario de carga masiva. Ideal para inmobiliarias con muchos inmuebles.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                asChild
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <Link href="/publicar/masivo">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Carga Masiva de Propiedades
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -258,8 +287,72 @@ export default function PublicarPropiedadPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Tipo de operación */}
+          {/* Selector de tipo de publicador (solo mostrar si no se ha seleccionado) */}
+          {!publisherType && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-3">¿Cómo vas a publicar?</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Seleccioná si vas a publicar como particular o como inmobiliaria
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setPublisherType('particular')}
+                  className="h-auto p-5 flex flex-col items-start hover:bg-accent transition-colors text-left justify-start"
+                >
+                  <User className="h-8 w-8 mb-3 text-primary flex-shrink-0" />
+                  <span className="text-lg font-semibold mb-2 w-full">Particular</span>
+                  <span className="text-sm text-muted-foreground text-left leading-snug break-words w-full">
+                    Publicá propiedades como persona particular
+                  </span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setPublisherType('inmobiliaria')}
+                  className="h-auto p-5 flex flex-col items-start hover:bg-accent transition-colors text-left justify-start"
+                >
+                  <Building2 className="h-8 w-8 mb-3 text-primary flex-shrink-0" />
+                  <span className="text-lg font-semibold mb-2 w-full">Inmobiliaria</span>
+                  <span className="text-sm text-muted-foreground text-left leading-snug break-words w-full">
+                    Publicá propiedades como inmobiliaria profesional
+                  </span>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Formulario (solo mostrar si se seleccionó el tipo de publicador) */}
+          {publisherType && (
+            <div className="space-y-4">
+              {/* Botón para cambiar el tipo */}
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div className="flex items-center gap-2">
+                  {publisherType === 'particular' ? (
+                    <>
+                      <User className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Publicando como Particular</span>
+                    </>
+                  ) : (
+                    <>
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Publicando como Inmobiliaria</span>
+                    </>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPublisherType(null)}
+                >
+                  Cambiar
+                </Button>
+              </div>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Tipo de operación */}
             <div className="space-y-2">
               <Label htmlFor="type">
                 Tipo de operación <span className="text-destructive">*</span>
@@ -790,6 +883,8 @@ export default function PublicarPropiedadPage() {
               </Button>
             </div>
           </form>
+            </div>
+          )}
         </Card>
       </main>
       <Footer />
