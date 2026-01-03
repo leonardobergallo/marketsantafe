@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { MapPin, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -14,12 +14,21 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 
+interface Property {
+  id: string
+  title: string
+  address?: string
+  latitude: number | null
+  longitude: number | null
+}
+
 interface LocationPickerProps {
   latitude?: number | null
   longitude?: number | null
   address?: string
   onLocationChange: (lat: number, lng: number, address: string) => void
   disabled?: boolean
+  showExistingProperties?: boolean
 }
 
 // Componente interno para manejar clicks en el mapa
@@ -43,7 +52,8 @@ export function LocationPicker({
   longitude, 
   address,
   onLocationChange,
-  disabled = false 
+  disabled = false,
+  showExistingProperties = true
 }: LocationPickerProps) {
   const [selectedLat, setSelectedLat] = useState<number | null>(latitude || null)
   const [selectedLng, setSelectedLng] = useState<number | null>(longitude || null)
@@ -53,12 +63,28 @@ export function LocationPicker({
   const [isSearching, setIsSearching] = useState(false)
   const [isMapReady, setIsMapReady] = useState(false)
   const [mapInstance, setMapInstance] = useState<any>(null)
+  const [existingProperties, setExistingProperties] = useState<Property[]>([])
 
   // Coordenadas por defecto: Centro de Santa Fe Capital
   const defaultCenter: [number, number] = [-31.6333, -60.7000]
   const initialPosition: [number, number] = selectedLat && selectedLng 
     ? [selectedLat, selectedLng]
     : defaultCenter
+
+  const loadExistingProperties = useCallback(async () => {
+    try {
+      const response = await fetch('/api/properties')
+      if (response.ok) {
+        const data = await response.json()
+        const propertiesWithCoords = (data.properties || []).filter(
+          (p: Property) => p.latitude !== null && p.longitude !== null
+        )
+        setExistingProperties(propertiesWithCoords)
+      }
+    } catch (error) {
+      console.error('Error cargando propiedades:', error)
+    }
+  }, [])
 
   useEffect(() => {
     // Solo ejecutar en el cliente
@@ -88,10 +114,15 @@ export function LocationPicker({
       setSelectedAddress(address)
     }
     
+    // Cargar propiedades existentes si está habilitado
+    if (showExistingProperties) {
+      loadExistingProperties()
+    }
+    
     // Marcar mapa como listo después de un pequeño delay
     const timer = setTimeout(() => setIsMapReady(true), 300)
     return () => clearTimeout(timer)
-  }, [latitude, longitude, address])
+  }, [latitude, longitude, address, showExistingProperties, loadExistingProperties])
 
   const handleMapClick = async (lat: number, lng: number) => {
     if (disabled) return
@@ -283,6 +314,27 @@ export function LocationPicker({
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            {/* Marcadores de propiedades existentes */}
+            {showExistingProperties && existingProperties.map((property) => (
+              <Marker 
+                key={property.id}
+                position={[property.latitude!, property.longitude!]}
+                opacity={0.6}
+              >
+                <Popup>
+                  <div className="p-2 min-w-[150px]">
+                    <h4 className="font-semibold text-sm mb-1 line-clamp-2">{property.title}</h4>
+                    {property.address && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        <span className="line-clamp-1">{property.address}</span>
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+            {/* Marcador de la propiedad actual (editable) */}
             {selectedLat && selectedLng && (
               <Marker 
                 position={[selectedLat, selectedLng]} 

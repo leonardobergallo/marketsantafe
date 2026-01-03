@@ -100,7 +100,20 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
     // Ordenar por featured primero, luego por fecha
     query += ` ORDER BY l.featured DESC, l.created_at DESC`
 
-    const result = await pool.query(query, params)
+    // Usar una conexión del pool con manejo de errores
+    let result
+    try {
+      result = await pool.query(query, params)
+    } catch (error: any) {
+      console.error('Error en getListings query:', error)
+      // Si es un error de conexión, intentar una vez más
+      if (error.message?.includes('Connection terminated') || error.code === 'ECONNRESET') {
+        console.warn('Reintentando query después de error de conexión...')
+        result = await pool.query(query, params)
+      } else {
+        throw error
+      }
+    }
 
     // Transformar resultados
     const listings: Listing[] = result.rows.map((row: any) => {
@@ -151,37 +164,80 @@ export async function getListingById(id: string): Promise<Listing | null> {
       return null
     }
 
-    const result = await pool.query(
-      `SELECT 
-        l.id,
-        l.title,
-        l.description,
-        l.price,
-        l.condition,
-        l.image_url,
-        l.images,
-        l.featured,
-        l.active,
-        l.views,
-        l.created_at,
-        c.id as category_id,
-        c.name as category_name,
-        c.slug as category_slug,
-        z.id as zone_id,
-        z.name as zone_name,
-        z.slug as zone_slug,
-        u.whatsapp,
-        u.phone,
-        u.name as user_name,
-        u.is_business,
-        u.business_name
-      FROM listings l
-      LEFT JOIN categories c ON l.category_id = c.id
-      LEFT JOIN zones z ON l.zone_id = z.id
-      LEFT JOIN users u ON l.user_id = u.id
-      WHERE l.id = $1 AND l.active = true`,
-      [listingId]
-    )
+    // Usar una conexión del pool con manejo de errores
+    let result
+    try {
+      result = await pool.query(
+        `SELECT 
+          l.id,
+          l.title,
+          l.description,
+          l.price,
+          l.condition,
+          l.image_url,
+          l.images,
+          l.featured,
+          l.active,
+          l.views,
+          l.created_at,
+          c.id as category_id,
+          c.name as category_name,
+          c.slug as category_slug,
+          z.id as zone_id,
+          z.name as zone_name,
+          z.slug as zone_slug,
+          u.whatsapp,
+          u.phone,
+          u.name as user_name,
+          u.is_business,
+          u.business_name
+        FROM listings l
+        LEFT JOIN categories c ON l.category_id = c.id
+        LEFT JOIN zones z ON l.zone_id = z.id
+        LEFT JOIN users u ON l.user_id = u.id
+        WHERE l.id = $1 AND l.active = true`,
+        [listingId]
+      )
+    } catch (error: any) {
+      console.error('Error en getListingById query:', error)
+      // Si es un error de conexión, intentar una vez más
+      if (error.message?.includes('Connection terminated') || error.code === 'ECONNRESET') {
+        console.warn('Reintentando query después de error de conexión...')
+        result = await pool.query(
+          `SELECT 
+            l.id,
+            l.title,
+            l.description,
+            l.price,
+            l.condition,
+            l.image_url,
+            l.images,
+            l.featured,
+            l.active,
+            l.views,
+            l.created_at,
+            c.id as category_id,
+            c.name as category_name,
+            c.slug as category_slug,
+            z.id as zone_id,
+            z.name as zone_name,
+            z.slug as zone_slug,
+            u.whatsapp,
+            u.phone,
+            u.name as user_name,
+            u.is_business,
+            u.business_name
+          FROM listings l
+          LEFT JOIN categories c ON l.category_id = c.id
+          LEFT JOIN zones z ON l.zone_id = z.id
+          LEFT JOIN users u ON l.user_id = u.id
+          WHERE l.id = $1 AND l.active = true`,
+          [listingId]
+        )
+      } else {
+        throw error
+      }
+    }
 
     if (result.rows.length === 0) {
       return null

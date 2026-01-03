@@ -7,11 +7,14 @@ import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Home, MapPin, DollarSign, Eye, Search } from 'lucide-react'
+import { Home, MapPin, DollarSign, Eye, Search, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { PropertiesFilters } from '@/components/properties-filters'
 import { PropertiesMap } from '@/components/properties-map'
+import { LeadsWizardForm } from '@/components/leads-wizard-form'
+import type { FlowType } from '@/lib/leads-types'
 
 interface Property {
   id: string
@@ -41,6 +44,8 @@ export default function PropiedadesPage() {
   const searchParams = useSearchParams()
   const [properties, setProperties] = useState<Property[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [wizardFlowType, setWizardFlowType] = useState<FlowType>('ALQUILAR')
 
   // Activar chatbot cuando se carga la página
   useEffect(() => {
@@ -137,26 +142,61 @@ export default function PropiedadesPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+          {/* Mapa de propiedades - dentro del container */}
+          {!isLoading && properties.length > 0 && (
+            <div className="mb-6 relative z-0">
+              <div className="h-[400px] sm:h-[450px] md:h-[500px] rounded-lg overflow-hidden border border-border relative z-0">
+                <PropertiesMap properties={properties} />
+              </div>
+            </div>
+          )}
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Home className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  Propiedades en Santa Fe
-                </h1>
-                <p className="text-muted-foreground">
-                  Encontrá tu próximo hogar o inversión
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Trabajamos con inmobiliarias locales. Te conectamos con la más adecuada para tu búsqueda.
-                </p>
+            <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-2xl p-8 md:p-12 text-center border border-primary/20">
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                  <Home className="h-10 w-10 text-white" />
+                </div>
+                <div className="flex-1 w-full">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    Propiedades en Santa Fe
+                  </h1>
+                  <p className="text-xl md:text-2xl text-foreground mb-3 font-semibold">
+                    Encontrá tu próximo hogar o inversión
+                  </p>
+                  <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Conectate con inmobiliarias y propietarios reales de tu zona. Alquilá, comprá o vendé de forma directa, cerca tuyo.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                  <Button
+                    onClick={() => {
+                      setWizardFlowType('ALQUILAR')
+                      setWizardOpen(true)
+                    }}
+                    variant="outline"
+                    size="lg"
+                    className="text-base border-2 hover:bg-primary/10"
+                  >
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Buscar Alquiler
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setWizardFlowType('COMPRAR')
+                      setWizardOpen(true)
+                    }}
+                    size="lg"
+                    className="text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  >
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Buscar Compra
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -168,16 +208,8 @@ export default function PropiedadesPage() {
               <PropertiesFilters />
             </div>
 
-            {/* Columna derecha: Mapa y Propiedades */}
+            {/* Columna derecha: Propiedades */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Mapa */}
-              {!isLoading && properties.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Ubicación de las propiedades</h2>
-                  <PropertiesMap properties={properties} />
-                </div>
-              )}
-
               {/* Resultados */}
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -268,6 +300,14 @@ export default function PropiedadesPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Wizard Form Modal */}
+      <LeadsWizardForm
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        flowType={wizardFlowType}
+        source="web:home"
+      />
     </div>
   )
 }

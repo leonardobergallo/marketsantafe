@@ -4,16 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { MapPin, Phone, Mail, Instagram, Eye, ArrowLeft, MessageCircle, Sparkles, Info, Building2, Loader2 } from 'lucide-react'
+import { MapPin, Eye, ArrowLeft, MessageCircle, Sparkles, Info, Building2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { SafeImage } from '@/components/safe-image'
-import { WHATSAPP_PLATAFORMA } from '@/lib/constants'
-import { routeLead } from '@/lib/routeLead'
 import type { Agency } from '@/lib/types'
-import { toast } from 'sonner'
+import { LeadsWizardForm } from '@/components/leads-wizard-form'
+import { PropertyChat } from '@/components/property-chat'
+import type { FlowType } from '@/lib/leads-types'
 
 interface Property {
   id: string
@@ -47,13 +44,16 @@ interface PropertyDetailClientProps {
 export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
   const [agency, setAgency] = useState<Agency | null>(null)
   const [isLoadingAgency, setIsLoadingAgency] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
-    nombre: '',
-    telefono: '',
-    email: '',
-    mensaje: '',
-  })
+  const [isWizardOpen, setIsWizardOpen] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  
+  // Determinar flowType según el tipo de propiedad
+  const getFlowType = (): FlowType => {
+    if (property.type === 'alquiler' || property.type === 'alquiler-temporal') {
+      return 'ALQUILAR'
+    }
+    return 'COMPRAR'
+  }
 
   // Determinar agencyId basado en la propiedad
   // Por ahora, usamos un mapeo basado en el usuario o professional_service
@@ -100,50 +100,6 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
     loadAgency()
   }, [property.id, property.user_name, property.user_id])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    try {
-      const agencyId = await getAgencyId()
-      const routedAgencyId = routeLead({
-        id: property.id,
-        title: property.title,
-        price: property.price,
-        operation: property.type === 'alquiler' ? 'alquiler' : 'venta',
-        agencyId: agencyId || undefined,
-      })
-
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          propertyId: property.id,
-          agencyId: routedAgencyId,
-          nombre: formData.nombre,
-          telefono: formData.telefono,
-          email: formData.email || undefined,
-          mensaje: formData.mensaje,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al enviar consulta')
-      }
-
-      toast.success('Tu consulta ha sido enviada correctamente')
-      setFormData({ nombre: '', telefono: '', email: '', mensaje: '' })
-    } catch (error) {
-      console.error('Error enviando consulta:', error)
-      toast.error('Error al enviar tu consulta. Por favor, intenta nuevamente.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const getTypeLabel = (type: string) => {
     switch (type) {
@@ -175,9 +131,6 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
     const formatted = new Intl.NumberFormat('es-AR').format(price)
     return currency === 'USD' ? `U$S ${formatted}` : `$${formatted}`
   }
-
-  // Determinar WhatsApp a usar
-  const whatsappToUse = agency?.whatsapp || property.whatsapp || WHATSAPP_PLATAFORMA
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -328,110 +281,35 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
         </Card>
       </div>
 
-      {/* Sidebar - Contacto */}
+      {/* Sidebar - Formulario de consulta */}
       <div className="lg:col-span-1">
         <Card className="p-6 sticky top-20 space-y-6">
+          {/* Formulario de consulta - Wizard */}
           <div>
-            <h2 className="font-semibold text-lg mb-4">Contacto</h2>
-            <div className="space-y-3">
-              <Button asChild className="w-full" size="lg">
-                <a
-                  href={`https://wa.me/${whatsappToUse.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  {agency ? `Contactar ${agency.name}` : 'Contactar por WhatsApp'}
-                </a>
+            <h2 className="font-semibold text-lg mb-2">Consultar sobre esta propiedad</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Completá este formulario y nos pondremos en contacto contigo
+            </p>
+            <div className="space-y-2">
+              <Button 
+                onClick={() => setIsChatOpen(true)} 
+                className="w-full" 
+                size="lg"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Chatear con el vendedor
               </Button>
-              {property.phone && (
-                <Button asChild variant="outline" className="w-full">
-                  <a href={`tel:${property.phone}`}>
-                    <Phone className="mr-2 h-4 w-4" />
-                    Llamar: {property.phone}
-                  </a>
-                </Button>
-              )}
-              {property.email && (
-                <Button asChild variant="outline" className="w-full">
-                  <a href={`mailto:${property.email}`}>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Enviar email
-                  </a>
-                </Button>
-              )}
-              {property.instagram && (
-                <Button asChild variant="outline" className="w-full">
-                  <a
-                    href={`https://instagram.com/${property.instagram.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Instagram className="mr-2 h-4 w-4" />
-                    @{property.instagram.replace('@', '')}
-                  </a>
-                </Button>
-              )}
+              <Button 
+                onClick={() => setIsWizardOpen(true)} 
+                className="w-full" 
+                variant="outline"
+                size="lg"
+              >
+                {property.type === 'alquiler' || property.type === 'alquiler-temporal' 
+                  ? 'Consultar por alquiler' 
+                  : 'Consultar por compra'}
+              </Button>
             </div>
-          </div>
-
-          {/* Formulario de consulta */}
-          <div className="pt-6 border-t">
-            <h3 className="font-semibold mb-4">Enviar consulta</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="nombre">Nombre *</Label>
-                <Input
-                  id="nombre"
-                  required
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  placeholder="Tu nombre"
-                />
-              </div>
-              <div>
-                <Label htmlFor="telefono">Teléfono *</Label>
-                <Input
-                  id="telefono"
-                  type="tel"
-                  required
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                  placeholder="Tu teléfono"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email (opcional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="tu@email.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="mensaje">Mensaje *</Label>
-                <Textarea
-                  id="mensaje"
-                  required
-                  value={formData.mensaje}
-                  onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
-                  placeholder="Tu consulta sobre esta propiedad..."
-                  rows={4}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  'Enviar consulta'
-                )}
-              </Button>
-            </form>
           </div>
 
           {/* Info adicional */}
@@ -459,6 +337,23 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
           </div>
         </Card>
       </div>
+
+      {/* Wizard Form Modal */}
+      <LeadsWizardForm
+        open={isWizardOpen}
+        onOpenChange={setIsWizardOpen}
+        propertyId={parseInt(property.id)}
+        flowType={getFlowType()}
+        source="web:property"
+      />
+
+      {/* Chat Modal */}
+      <PropertyChat
+        propertyId={parseInt(property.id)}
+        title={property.title}
+        open={isChatOpen}
+        onOpenChange={setIsChatOpen}
+      />
     </div>
   )
 }

@@ -193,6 +193,14 @@ export default function InmobiliariaEnEquipoPage() {
         </div>
 
         <Tabs defaultValue="properties" className="w-full">
+          <div className="mb-4">
+            <Button asChild variant="outline">
+              <Link href="/inmobiliaria-en-equipo/chat">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chat con clientes
+              </Link>
+            </Button>
+          </div>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="properties">
               <Home className="mr-2 h-4 w-4" />

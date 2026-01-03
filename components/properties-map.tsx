@@ -74,9 +74,26 @@ export function PropertiesMap({ properties }: PropertiesMapProps) {
       }
     }
 
+    // Reducir z-index de elementos Leaflet para que no tapen modales (z-50)
+    const style = document.createElement('style')
+    style.id = 'leaflet-z-index-fix'
+    style.textContent = `
+      .leaflet-container { z-index: 0 !important; }
+      .leaflet-pane { z-index: 1 !important; }
+      .leaflet-popup { z-index: 10 !important; }
+      .leaflet-control { z-index: 10 !important; }
+    `
+    // Solo agregar si no existe
+    if (!document.getElementById('leaflet-z-index-fix')) {
+      document.head.appendChild(style)
+    }
+
     // Marcar mapa como listo después de un pequeño delay
     const timer = setTimeout(() => setIsMapReady(true), 300)
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      // No remover el estilo porque puede ser usado por otros mapas
+    }
   }, [properties])
 
   const formatPrice = (price: number, currency: string) => {
@@ -125,11 +142,11 @@ export function PropertiesMap({ properties }: PropertiesMapProps) {
   }
 
   return (
-    <div className="w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-border">
+    <div className="w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-border" style={{ position: 'relative', zIndex: 0 }}>
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', position: 'relative' }}
         scrollWheelZoom={true}
       >
         <TileLayer

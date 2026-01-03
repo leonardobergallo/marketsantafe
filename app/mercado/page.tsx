@@ -12,7 +12,7 @@ import { getListings, type ListingFilters } from '@/lib/db-queries'
 import { type Listing } from '@/lib/mockListings'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Filter } from 'lucide-react'
+import { Filter, Store } from 'lucide-react'
 import Image from 'next/image'
 
 interface MercadoPageProps {
@@ -51,9 +51,9 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
       <ChatbotActivator delay={2000} />
       <main className="flex-1">
         {/* Banner mercado - full ancho */}
-        <div className="relative w-full h-[200px] md:h-[250px] lg:h-[300px] mb-8">
+        <div className="relative w-screen h-[180px] sm:h-[220px] md:h-[280px] lg:h-[320px] mb-6 overflow-hidden -mx-4 sm:-mx-6 md:-mx-8">
           <Image
-            src="/banner_mercado.png"
+            src="/uploads/portada productos.jpg"
             alt="Mercado - Lo que se vende cerca tuyo"
             fill
             priority
@@ -64,13 +64,23 @@ export default async function MercadoPage({ searchParams }: MercadoPageProps) {
 
         <div className="container mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
           {/* Header de la página */}
-          <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Mercado
-            </h1>
-            <p className="text-muted-foreground">
-              Lo que se vende cerca tuyo
-            </p>
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-background rounded-2xl p-8 md:p-12 text-center border border-blue-500/20">
+              <div className="flex flex-col items-center gap-4">
+                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-lg">
+                  <Store className="h-10 w-10 text-white" />
+                </div>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                  Mercado
+                </h1>
+                <p className="text-xl md:text-2xl text-foreground mb-3 font-semibold">
+                  Encontrá lo que buscás cerca tuyo
+                </p>
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Conectate con gente real de tu zona. Comprá y vendé de forma directa, sin intermediarios.
+                </p>
+              </div>
+            </div>
           </div>
 
         {/* Buscador principal */}

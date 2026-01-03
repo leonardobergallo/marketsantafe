@@ -7,7 +7,7 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Loader2, Shield, Users, Home, Package, BarChart3 } from 'lucide-react'
+import { Loader2, Shield, Users, Home, Package, BarChart3, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -145,6 +145,21 @@ export default function AdminPage() {
 
         {/* Secciones */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Link href="/admin/leads">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <MessageSquare className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Bandeja de Leads</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Gestioná todas las consultas y mensajes
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </Card>
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">

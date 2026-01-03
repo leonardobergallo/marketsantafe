@@ -12,11 +12,12 @@ import { type Listing } from '@/lib/mockListings'
 import { getCategoryById } from '@/lib/categories'
 import { getZoneById } from '@/lib/zones'
 import { formatPrice } from '@/lib/utils'
-import { ArrowLeft, Phone, MessageCircle, MapPin, Calendar } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ImageGallery } from '@/components/image-gallery'
 import { SafeImage } from '@/components/safe-image'
+import { AvisoDetailClient } from './AvisoDetailClient'
 
 interface AvisoPageProps {
   params: Promise<{
@@ -135,57 +136,14 @@ export default async function AvisoPage({ params }: AvisoPageProps) {
           </div>
 
           {/* Columna lateral - Contacto */}
-          <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-20">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Contacto</h2>
-              <div className="space-y-3">
-                {whatsappUrl && (
-                  <Button
-                    asChild
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Contactar por WhatsApp
-                    </a>
-                  </Button>
-                )}
-                {phoneUrl && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <a href={phoneUrl}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Llamar
-                    </a>
-                  </Button>
-                )}
-                {!whatsappUrl && !phoneUrl && (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No hay información de contacto disponible
-                  </p>
-                )}
-              </div>
-
-              {/* Información adicional */}
-              <div className="mt-6 pt-6 border-t border-border space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Categoría:</span>
-                  <span className="font-medium">{category?.name || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Zona:</span>
-                  <span className="font-medium">{zone?.name || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Condición:</span>
-                  <span className="font-medium">{conditionLabels[listing.condition]}</span>
-                </div>
-              </div>
-            </Card>
-          </div>
+          <AvisoDetailClient 
+            listing={{
+              ...listing,
+              category: category ? { id: category.id, name: category.name } : undefined,
+              zone: zone ? { id: zone.id, name: zone.name } : undefined,
+              condition: conditionLabels[listing.condition],
+            }}
+          />
         </div>
       </main>
       <Footer />

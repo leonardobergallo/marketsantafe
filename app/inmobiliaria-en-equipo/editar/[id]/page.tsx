@@ -123,6 +123,73 @@ export default function EditarPropiedadPage() {
     checkAuth()
   }, [router])
 
+  // Cargar datos de la propiedad cuando esté autenticado
+  useEffect(() => {
+    const loadProperty = async () => {
+      if (!isAuthenticated || !propertyId) {
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/properties/${propertyId}/edit`)
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            toast.error('Propiedad no encontrada')
+            router.push('/inmobiliaria-en-equipo/mis-propiedades')
+            return
+          }
+          if (response.status === 401) {
+            router.push('/login?redirect=/inmobiliaria-en-equipo/editar/' + propertyId)
+            return
+          }
+          throw new Error('Error al cargar la propiedad')
+        }
+
+        const data = await response.json()
+        const property = data.property
+
+        // Rellenar formulario con los datos
+        setValue('type', property.type)
+        setValue('title', property.title)
+        setValue('description', property.description)
+        setValue('price', property.price.toString())
+        setValue('currency', property.currency || 'ARS')
+        setValue('zone_id', property.zone_id?.toString() || '')
+        setValue('rooms', property.rooms?.toString() || '')
+        setValue('bathrooms', property.bathrooms?.toString() || '')
+        setValue('area_m2', property.area_m2?.toString() || '')
+        setValue('address', property.address || '')
+        setValue('latitude', property.latitude)
+        setValue('longitude', property.longitude)
+        setValue('phone', property.phone || '')
+        setValue('whatsapp', property.whatsapp || '')
+        setValue('email', property.email || '')
+        setValue('instagram', property.instagram || '')
+        setValue('images', property.images || [])
+        setValue('professional_service', property.professional_service || false)
+
+        // Establecer ubicación seleccionada
+        if (property.latitude && property.longitude) {
+          setSelectedLatitude(property.latitude)
+          setSelectedLongitude(property.longitude)
+        }
+        if (property.address) {
+          setSelectedAddress(property.address)
+        }
+
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error cargando propiedad:', error)
+        toast.error('Error al cargar la propiedad')
+        setIsLoading(false)
+        router.push('/inmobiliaria-en-equipo/mis-propiedades')
+      }
+    }
+
+    loadProperty()
+  }, [isAuthenticated, propertyId, router, setValue])
+
   const onSubmit = async (data: PropertyFormData) => {
     setIsSubmitting(true)
 

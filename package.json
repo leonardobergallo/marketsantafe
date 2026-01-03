@@ -34,7 +34,9 @@
     "db:import-productos-sin-fotos-leonardo": "tsx scripts/import-productos-sin-fotos-leonardo.ts",
     "db:fix-prices-divide-1530": "tsx scripts/fix-prices-divide-1530.ts",
     "db:fix-condition-productos-sin-fotos": "tsx scripts/fix-condition-productos-sin-fotos.ts",
-    "db:fix-productos-sin-fotos": "tsx scripts/fix-productos-sin-fotos-prices-condition.ts"
+    "db:fix-productos-sin-fotos": "tsx scripts/fix-productos-sin-fotos-prices-condition.ts",
+    "db:backup": "tsx scripts/backup-database.ts",
+    "db:add-leads-system": "tsx scripts/add-leads-system-tables.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

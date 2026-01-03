@@ -1,0 +1,66 @@
+// API: Obtener conversaciones de una propiedad (para el vendedor)
+// GET /api/properties/[id]/conversations
+
+import { NextRequest, NextResponse } from 'next/server'
+import { pool } from '@/lib/db'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const propertyId = parseInt(id)
+
+    if (isNaN(propertyId)) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+    }
+
+    // Obtener conversaciones de la propiedad
+    const result = await pool.query(
+      `SELECT 
+        c.id,
+        c.property_id,
+        c.seller_id,
+        c.buyer_name,
+        c.buyer_email,
+        c.buyer_whatsapp,
+        c.status,
+        c.last_message_at,
+        c.created_at,
+        c.updated_at,
+        p.title as property_title,
+        (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.sender_type = 'buyer' AND m.read_at IS NULL) as unread_count
+       FROM conversations c
+       LEFT JOIN properties p ON c.property_id = p.id
+       WHERE c.property_id = $1
+       ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC`,
+      [propertyId]
+    )
+
+    return NextResponse.json({
+      success: true,
+      conversations: result.rows.map((row) => ({
+        id: row.id,
+        property_id: row.property_id,
+        seller_id: row.seller_id,
+        buyer_name: row.buyer_name,
+        buyer_email: row.buyer_email,
+        buyer_whatsapp: row.buyer_whatsapp,
+        status: row.status,
+        last_message_at: row.last_message_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        property_title: row.property_title,
+        unread_count: parseInt(row.unread_count) || 0,
+      })),
+    })
+  } catch (error: any) {
+    console.error('Error obteniendo conversaciones:', error)
+    return NextResponse.json(
+      { error: 'Error al obtener conversaciones', details: error.message },
+      { status: 500 }
+    )
+  }
+}
+

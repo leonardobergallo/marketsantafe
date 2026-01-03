@@ -31,7 +31,14 @@ function getPool(): Pool {
       },
       max: 20, // Máximo de conexiones en el pool
       idleTimeoutMillis: 30000, // Cerrar conexiones inactivas después de 30 segundos
-      connectionTimeoutMillis: 10000, // Timeout de conexión de 10 segundos
+      connectionTimeoutMillis: 30000, // Timeout de conexión de 30 segundos (Neon puede tardar más cuando está inactivo)
+      allowExitOnIdle: false, // No permitir que el proceso termine cuando el pool esté idle
+    })
+    
+    // Manejar errores del pool - importante para Neon
+    poolInstance.on('error', (err) => {
+      console.error('Error inesperado en el pool de conexiones:', err)
+      // No destruir el pool aquí - pg manejará la reconexión automáticamente
     })
   }
   return poolInstance
